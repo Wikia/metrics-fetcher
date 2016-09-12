@@ -1,0 +1,30 @@
+sudo: false
+language: go
+
+go:
+  - 1.5.4
+  - 1.6.3
+  - 1.7.1
+  - tip
+
+matrix:
+  allow_failures:
+    - go: tip
+
+before_script:
+  - go get -u github.com/golang/lint/golint
+
+script:
+  - make test
+
+after_script:
+  - test -z "$(gofmt -s -l -w . | tee /dev/stderr)"
+  - test -z "$(golint ./...     | tee /dev/stderr)"
+  - make vet
+
+os:
+  - linux
+  - osx
+
+notifications:
+  email: false
