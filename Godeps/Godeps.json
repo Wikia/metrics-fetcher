@@ -2,14 +2,33 @@
 	"ImportPath": "github.com/Wikia/metrics-fetcher",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v74",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.9.0-15-g219c8cb",
+			"Rev": "219c8cb75c258c552e999735be6df753ffc7afdc"
+		},
+		{
+			"ImportPath": "github.com/donovanhide/eventsource",
+			"Rev": "fd1de70867126402be23c306e1ce32828455d85b"
+		},
 		{
 			"ImportPath": "github.com/fsnotify/fsnotify",
 			"Comment": "v1.3.1-1-gf12c623",
 			"Rev": "f12c6236fe7b5cf6bcf30e5935d08cb079d78334"
+		},
+		{
+			"ImportPath": "github.com/gambol99/go-marathon",
+			"Comment": "v0.1.0-8-g5e63f97",
+			"Rev": "5e63f97a03e7c519e489834142de7893649aae53"
+		},
+		{
+			"ImportPath": "github.com/go-errors/errors",
+			"Rev": "a41850380601eeb43f4350f7d17c6bbd8944aaf8"
+		},
+		{
+			"ImportPath": "github.com/google/go-querystring/query",
+			"Rev": "9235644dd9e52eeae6fa48efd539fdc351a0af53"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/hcl",
@@ -63,6 +82,15 @@
 		{
 			"ImportPath": "github.com/mitchellh/mapstructure",
 			"Rev": "ca63d7c062ee3c9f34db231e352b60012b4fd0c1"
+		},
+		{
+			"ImportPath": "github.com/moul/http2curl",
+			"Rev": "b1479103caacaa39319f75e7f57fc545287fca0d"
+		},
+		{
+			"ImportPath": "github.com/parnurzeal/gorequest",
+			"Comment": "v0.2.14-2-g827f321",
+			"Rev": "827f321971c658c6c0201a49cda2581850b055d8"
 		},
 		{
 			"ImportPath": "github.com/pelletier/go-buffruneio",
@@ -129,6 +157,10 @@
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
 			"Rev": "0e31b188fd38db611d4fbab7de9373a95f36aae5"
+		},
+		{
+			"ImportPath": "golang.org/x/net/publicsuffix",
+			"Rev": "6acef71eb69611914f7a30939ea9f6e194c78172"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",

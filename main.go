@@ -20,8 +20,12 @@
 
 package main
 
-import "github.com/Wikia/metrics-fetcher/cmd"
+import (
+	log "github.com/Sirupsen/logrus"
+	"github.com/Wikia/metrics-fetcher/cmd"
+)
 
 func main() {
+	log.SetLevel(log.DebugLevel)
 	cmd.Execute()
 }
