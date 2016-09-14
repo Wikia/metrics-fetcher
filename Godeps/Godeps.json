@@ -71,6 +71,31 @@
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
 		},
 		{
+			"ImportPath": "github.com/influxdata/influxdb/client/v2",
+			"Comment": "v0.12.1",
+			"Rev": "e094138084855d444195b252314dfee9eae34cab"
+		},
+		{
+			"ImportPath": "github.com/influxdata/influxdb/models",
+			"Comment": "v0.12.1",
+			"Rev": "e094138084855d444195b252314dfee9eae34cab"
+		},
+		{
+			"ImportPath": "github.com/influxdata/influxdb/pkg/escape",
+			"Comment": "v0.12.1",
+			"Rev": "e094138084855d444195b252314dfee9eae34cab"
+		},
+		{
+			"ImportPath": "github.com/influxdata/telegraf",
+			"Comment": "1.0.0-beta3-101-g9757d39",
+			"Rev": "9757d392400898e343b0621f48c707fee4c2e29e"
+		},
+		{
+			"ImportPath": "github.com/influxdata/telegraf/plugins/parsers/json",
+			"Comment": "1.0.0-beta3-101-g9757d39",
+			"Rev": "9757d392400898e343b0621f48c707fee4c2e29e"
+		},
+		{
 			"ImportPath": "github.com/kr/fs",
 			"Rev": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
 		},
@@ -173,6 +198,11 @@
 		{
 			"ImportPath": "golang.org/x/text/unicode/norm",
 			"Rev": "1e65e9bf72c307081cea196f47ef37aed17eb316"
+		},
+		{
+			"ImportPath": "gopkg.in/go-playground/pool.v3",
+			"Comment": "v3.1.1",
+			"Rev": "e73cd3a5ded835540c5cf4778488579c5b357d68"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
