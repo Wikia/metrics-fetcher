@@ -17,3 +17,5 @@ type SimpleMetrics struct {
 	Service ServiceInfo
 	Metrics map[string]interface{}
 }
+
+type GrouppedMetrics map[string][]SimpleMetrics

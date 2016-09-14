@@ -2,21 +2,20 @@ package registry
 
 import (
 	"net/url"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/metrics-fetcher/models"
 	marathon "github.com/gambol99/go-marathon"
 	"github.com/go-errors/errors"
+	"gopkg.in/go-playground/pool.v3"
 )
 
 type MarathonRegistry struct {
 	client    marathon.Marathon
-	MaxWorker int
-	MaxQueue  int
+	MaxWorker uint
 }
 
-func NewMarathonRegistry(host string, queueSize int, numWorkers int) (*MarathonRegistry, error) {
+func NewMarathonRegistry(host string, numWorkers uint) (*MarathonRegistry, error) {
 	config := marathon.NewDefaultConfig()
 	config.URL = host
 
@@ -31,37 +30,41 @@ func NewMarathonRegistry(host string, queueSize int, numWorkers int) (*MarathonR
 	return &MarathonRegistry{
 		client:    marathonClient,
 		MaxWorker: numWorkers,
-		MaxQueue:  queueSize,
 	}, nil
 }
 
-func fetchServiceTasks(client marathon.Marathon, queue <-chan string, results chan<- models.ServiceInfo, finish chan<- bool) {
-	for appID := range queue {
+func fetchServiceTasks(client marathon.Marathon, appID string) pool.WorkFunc {
+	return func(wu pool.WorkUnit) (interface{}, error) {
 		log.WithField("app_id", appID).Debug("Fetching tasks")
+
 		details, err := client.Application(appID)
 		if err != nil {
+			err = errors.Wrap(err, 0)
 			log.WithError(err).WithField("app_id", appID).Error("Error getting app details")
-			finish <- false
-			continue
+			return nil, err
 		}
 
+		if wu.IsCancelled() {
+			return nil, nil
+		}
+
+		result := []models.ServiceInfo{}
 		for _, task := range details.Tasks {
 			log.WithField("app_id", appID).Debug("Adding task: ", task.ID)
 			if len(task.Ports) == 0 {
 				log.WithField("app_id", appID).Warn("Service has no ports defined: skipping")
-				finish <- false
-				continue
+				return nil, errors.Errorf("No prort defined for service: %s", appID)
 			}
 
-			results <- models.ServiceInfo{
+			result = append(result, models.ServiceInfo{
 				Name: task.AppID,
 				ID:   task.ID,
 				Host: task.Host,
 				Port: task.Ports[len(task.Ports)-1],
-			}
+			})
 		}
 		log.WithField("app_id", appID).Debug("Finished adding tasks")
-		finish <- true
+		return result, nil
 	}
 }
 
@@ -76,41 +79,28 @@ func (c MarathonRegistry) GetServices(label string) ([]models.ServiceInfo, error
 
 	log.Infof("Fetched %d apps with label '%s'", len(apps.Apps), label)
 
-	queue := make(chan string, c.MaxQueue)
-	results := make(chan models.ServiceInfo)
-	defer close(results)
+	p := pool.NewLimited(c.MaxWorker)
+	defer p.Close()
 
-	taskNum := 0
-	processed := make(chan bool, len(apps.Apps))
-
-	log.Debugf("Starting workers for %d jobs", taskNum-1)
-
-	for i := 0; i < c.MaxWorker; i++ {
-		go fetchServiceTasks(c.client, queue, results, processed)
-	}
-
-	for i, app := range apps.Apps {
-		log.Debugf("Found application '%s' (%d)", app.ID, i+1)
-		queue <- app.ID
-		taskNum++
-	}
-	close(queue)
+	log.Debugf("Starting workers for %d jobs", len(apps.Apps))
+	batch := p.Batch()
+	go func() {
+		for i, app := range apps.Apps {
+			log.Debugf("Found application '%s' (%d)", app.ID, i+1)
+			batch.Queue(fetchServiceTasks(c.client, app.ID))
+		}
+		batch.QueueComplete()
+	}()
+	log.Debug("All tasks scheduled!")
 
 	var serviceInfos []models.ServiceInfo
-FETCHLOOP:
-	for {
-		select {
-		case serviceInfo := <-results:
-			serviceInfos = append(serviceInfos, serviceInfo)
-		case <-processed:
-			log.Debug("Worker finished, left: ", taskNum)
-			taskNum--
-			if taskNum <= 0 {
-				break FETCHLOOP
-			}
-		case <-time.After(time.Second * 3):
-			break FETCHLOOP
+	for infos := range batch.Results() {
+		if err := infos.Error(); err != nil {
+			log.WithError(err).Error("Error fetching results")
+			continue
 		}
+		log.Debug("Successfully retrieved an result")
+		serviceInfos = append(serviceInfos, infos.Value().([]models.ServiceInfo)...)
 	}
 
 	return serviceInfos, nil
