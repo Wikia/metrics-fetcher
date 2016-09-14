@@ -2,20 +2,15 @@ package metrics
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/Wikia/metrics-fetcher/registry"
+	"github.com/Wikia/metrics-fetcher/models"
 	"github.com/parnurzeal/gorequest"
 )
 
-type SimpleMetrics struct {
-	Service registry.ServiceInfo
-	Metrics map[string]interface{}
-}
-
-func GatherServiceMetrics(services []registry.ServiceInfo, queueSize int, maxWorkers int) map[string][]SimpleMetrics {
+func GatherServiceMetrics(services []models.ServiceInfo, queueSize int, maxWorkers int) map[string][]models.SimpleMetrics {
 	log.Infof("Starting metrics fetching: %d services", len(services))
 
-	gatherQueue := make(chan registry.ServiceInfo, queueSize)
-	gatherResults := make(chan SimpleMetrics)
+	gatherQueue := make(chan models.ServiceInfo, queueSize)
+	gatherResults := make(chan models.SimpleMetrics)
 	defer close(gatherResults)
 
 	taskNum := 0
@@ -33,7 +28,7 @@ func GatherServiceMetrics(services []registry.ServiceInfo, queueSize int, maxWor
 	}
 	close(gatherQueue)
 
-	metrics := make(map[string][]SimpleMetrics)
+	metrics := make(map[string][]models.SimpleMetrics)
 
 	for i := 0; i < taskNum; i++ {
 		metric := <-gatherResults
@@ -43,9 +38,9 @@ func GatherServiceMetrics(services []registry.ServiceInfo, queueSize int, maxWor
 	return metrics
 }
 
-func getServiceMetrics(queue <-chan registry.ServiceInfo, results chan<- SimpleMetrics) {
+func getServiceMetrics(queue <-chan models.ServiceInfo, results chan<- models.SimpleMetrics) {
 	for serviceInfo := range queue {
-		metric := SimpleMetrics{Service: serviceInfo}
+		metric := models.SimpleMetrics{Service: serviceInfo}
 
 		log.WithFields(log.Fields{"task_id": metric.Service.ID, "uri": metric.Service.GetAddress()}).Info("Fetching metrics for service")
 

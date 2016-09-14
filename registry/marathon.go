@@ -1,11 +1,11 @@
 package registry
 
 import (
-	"fmt"
 	"net/url"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/Wikia/metrics-fetcher/models"
 	marathon "github.com/gambol99/go-marathon"
 	"github.com/go-errors/errors"
 )
@@ -14,17 +14,6 @@ type MarathonRegistry struct {
 	client    marathon.Marathon
 	MaxWorker int
 	MaxQueue  int
-}
-
-type ServiceInfo struct {
-	Name string
-	ID   string
-	Host string
-	Port int
-}
-
-func (s ServiceInfo) GetAddress() string {
-	return fmt.Sprintf("http://%s:%d/metrics", s.Host, s.Port)
 }
 
 func NewMarathonRegistry(host string, queueSize int, numWorkers int) (*MarathonRegistry, error) {
@@ -46,7 +35,7 @@ func NewMarathonRegistry(host string, queueSize int, numWorkers int) (*MarathonR
 	}, nil
 }
 
-func fetchServiceTasks(client marathon.Marathon, queue <-chan string, results chan<- ServiceInfo, finish chan<- bool) {
+func fetchServiceTasks(client marathon.Marathon, queue <-chan string, results chan<- models.ServiceInfo, finish chan<- bool) {
 	for appID := range queue {
 		log.WithField("app_id", appID).Debug("Fetching tasks")
 		details, err := client.Application(appID)
@@ -64,7 +53,7 @@ func fetchServiceTasks(client marathon.Marathon, queue <-chan string, results ch
 				continue
 			}
 
-			results <- ServiceInfo{
+			results <- models.ServiceInfo{
 				Name: task.AppID,
 				ID:   task.ID,
 				Host: task.Host,
@@ -76,7 +65,7 @@ func fetchServiceTasks(client marathon.Marathon, queue <-chan string, results ch
 	}
 }
 
-func (c MarathonRegistry) GetServices(label string) ([]ServiceInfo, error) {
+func (c MarathonRegistry) GetServices(label string) ([]models.ServiceInfo, error) {
 	v := url.Values{}
 	v.Set("label", label)
 
@@ -88,7 +77,7 @@ func (c MarathonRegistry) GetServices(label string) ([]ServiceInfo, error) {
 	log.Infof("Fetched %d apps with label '%s'", len(apps.Apps), label)
 
 	queue := make(chan string, c.MaxQueue)
-	results := make(chan ServiceInfo)
+	results := make(chan models.ServiceInfo)
 	defer close(results)
 
 	taskNum := 0
@@ -107,7 +96,7 @@ func (c MarathonRegistry) GetServices(label string) ([]ServiceInfo, error) {
 	}
 	close(queue)
 
-	var serviceInfos []ServiceInfo
+	var serviceInfos []models.ServiceInfo
 FETCHLOOP:
 	for {
 		select {
