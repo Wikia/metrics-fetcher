@@ -45,7 +45,6 @@ func getServiceMetrics(serviceInfo models.ServiceInfo) pool.WorkFunc {
 		metric := models.SimpleMetrics{Service: serviceInfo}
 
 		log.WithFields(log.Fields{"task_id": metric.Service.ID, "uri": metric.Service.GetAddress()}).Info("Fetching metrics for service")
-
 		resp, _, err := gorequest.New().Get(metric.Service.GetAddress()).EndStruct(&metric.Metrics)
 
 		if len(err) != 0 {

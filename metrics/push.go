@@ -7,7 +7,6 @@ import (
 	"github.com/Wikia/metrics-fetcher/models"
 	"github.com/go-errors/errors"
 	"github.com/influxdata/influxdb/client/v2"
-	jsonparser "github.com/influxdata/telegraf/plugins/parsers/json"
 )
 
 func SendMetrics(address string, username string, password string, grouppedMetrics models.GrouppedMetrics) error {
@@ -41,10 +40,9 @@ func SendMetrics(address string, username string, password string, grouppedMetri
 		tags := map[string]string{"service_name": serviceName}
 		pointsNum := 0
 		for _, metric := range metrics {
-			jp := jsonparser.JSONFlattener{}
-			jp.FlattenJSON("", metric.Metrics)
+			fields := map[string]interface{}{}
 			tags["hostname"] = metric.Service.Host
-			pt, err := client.NewPoint("service_stats", tags, jp.Fields, time.Now())
+			pt, err := client.NewPoint("service_stats", tags, fields, time.Now())
 			if err != nil {
 				log.WithError(err).Error("Error adding points to a batch")
 				continue

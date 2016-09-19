@@ -28,7 +28,7 @@ LDFLAGS := -ldflags "-X $(VERSION_PACKAGE).Version=${VERSION_GIT} -X $(VERSION_P
 
 .DEFAULT_GOAL: $(BINARY)
 
-$(BINARY): $(SOURCES) prepare
+$(BINARY): $(SOURCES)
 	go build ${LDFLAGS} -o ${BINARY} main.go
 
 $(GO_LINT):

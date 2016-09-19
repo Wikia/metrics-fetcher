@@ -60,15 +60,17 @@ For now it supports only Influx line protocol.`,
 		}
 
 		// gathering metrics
-		log.Info("Fetching metrics from services")
+		log.Infof("Fetching metrics from services: %d", len(services))
 		grouppedMetrics := metrics.GatherServiceMetrics(services, numWorkers)
 
-		log.Info("Sending metrics to database")
-		err = metrics.SendMetrics(influxAddress, "", "", grouppedMetrics)
-		if err != nil {
-			log.WithError(err).Error("Error sending metrics")
-			return
-		}
+		// log.Info("Sending metrics to database")
+		// err = metrics.SendMetrics(influxAddress, "", "", grouppedMetrics)
+		// if err != nil {
+		// 	log.WithError(err).Error("Error sending metrics")
+		// 	return
+		// }
+		combinedMetrics, _ := metrics.CombineMetrics(grouppedMetrics)
+		log.Debug(combinedMetrics)
 	},
 }
 
