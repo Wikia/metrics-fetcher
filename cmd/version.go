@@ -18,14 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package main
+package cmd
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"github.com/Wikia/metrics-fetcher/cmd"
+	"fmt"
+
+	"github.com/Wikia/metrics-fetcher/common"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	log.SetLevel(log.DebugLevel)
-	cmd.Execute()
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Returns current version of the program",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(common.GetCurrentVersion())
+	},
+}
+
+func init() {
+	RootCmd.AddCommand(versionCmd)
 }
