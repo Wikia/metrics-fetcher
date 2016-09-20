@@ -72,7 +72,6 @@ For now it supports only Influx line protocol.`,
 		// }
 		combinedMetrics, _ := metrics.CombineMetrics(grouppedMetrics)
 		metrics.OutputMetrics(combinedMetrics, os.Stdout)
-		log.Debug(combinedMetrics)
 	},
 }
 
