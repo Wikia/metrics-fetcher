@@ -1,19 +1,19 @@
 package metrics
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/metrics-fetcher/models"
-	"fmt"
-	"strings"
-	"io"
 	"github.com/pkg/errors"
+	"io"
+	"strings"
 )
 
 func OutputMetrics(filteredMetrics []models.FilteredMetrics, writer io.Writer) error {
-	log.Info("outputting metrics");
+	log.Info("outputting metrics")
 	for _, metric := range filteredMetrics {
-		if (len(metric.Fields) == 0) {
-			return errors.Errorf("no fields in metric %s")
+		if len(metric.Fields) == 0 {
+			return errors.Errorf("no fields in metric")
 		}
 
 		tagKeysAndValues := []string{}
@@ -39,7 +39,7 @@ func OutputMetrics(filteredMetrics []models.FilteredMetrics, writer io.Writer) e
 			fieldKeysAndValues = append(fieldKeysAndValues, fmt.Sprintf(fmt.Sprintf("%%s=%s", valueFormat), escapeCommasEqualSignsAndSpaces(fieldKey), fieldValue))
 		}
 		fields := strings.Join(fieldKeysAndValues, ",")
-		if (len(tags) == 0) {
+		if len(tags) == 0 {
 			fmt.Fprint(writer, fmt.Sprintf("%s %s\n", "resources", fields))
 		} else {
 			fmt.Fprint(writer, fmt.Sprintf("%s,%s %s\n", "resources", tags, fields))

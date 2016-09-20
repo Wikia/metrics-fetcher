@@ -1,17 +1,17 @@
 package metrics
 
 import (
-	"testing"
 	"github.com/Wikia/metrics-fetcher/models"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"testing"
 )
 
 func TestOutputMetricsWhenFiltersEmpty(t *testing.T) {
 	//given
 	testObj := new(MockedWriter)
 	//when
-	OutputMetrics([]models.FilteredMetrics{}, testObj);
+	OutputMetrics([]models.FilteredMetrics{}, testObj)
 	//then
 	testObj.AssertNotCalled(t, "Write")
 }
