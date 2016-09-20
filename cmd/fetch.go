@@ -27,15 +27,16 @@ import (
 	"github.com/Wikia/metrics-fetcher/metrics"
 	"github.com/Wikia/metrics-fetcher/registry"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
-	marathonHost    string
-	marathonLabel   string
-	influxAddress   string
-	influxDB        string
+	marathonHost string
+	marathonLabel string
+	influxAddress string
+	influxDB string
 	influxRetention string
-	numWorkers      uint
+	numWorkers uint
 )
 
 // fetchCmd represents the fetch command
@@ -70,6 +71,7 @@ For now it supports only Influx line protocol.`,
 		// 	return
 		// }
 		combinedMetrics, _ := metrics.CombineMetrics(grouppedMetrics)
+		metrics.OutputMetrics(combinedMetrics, os.Stdout)
 		log.Debug(combinedMetrics)
 	},
 }
@@ -80,6 +82,6 @@ func init() {
 	fetchCmd.Flags().StringVar(&influxAddress, "influx", "http://localhost:8086", "address of an InfluxDB server where metrics should be pushed")
 	fetchCmd.Flags().StringVar(&influxDB, "database", "services", "name of the InfluxDB database")
 	fetchCmd.Flags().StringVar(&influxRetention, "retention", "default", "which retention policy should we use for pushing metrics")
-	fetchCmd.Flags().UintVar(&numWorkers, "workers", uint(runtime.NumCPU()*5), "how many fetcher workers to spawn")
+	fetchCmd.Flags().UintVar(&numWorkers, "workers", uint(runtime.NumCPU() * 5), "how many fetcher workers to spawn")
 	RootCmd.AddCommand(fetchCmd)
 }
