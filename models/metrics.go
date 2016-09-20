@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type ServiceInfo struct {
@@ -45,11 +46,19 @@ type PandoraMeter struct {
 	Count uint64
 }
 
+func (pm PandoraMeter) String() string {
+	return fmt.Sprintf("%v", pm.Count)
+}
+
 type PandoraTimer struct {
 	Count  uint64
 	P50    float64
 	P99    float64
 	M1Rate float64
+}
+
+func (pt PandoraTimer) String() string {
+	return fmt.Sprintf("value: %v, P50: %v, P99: %v, M1_Rate: %v", pt.Count, pt.P50, pt.P99, pt.M1Rate)
 }
 
 type PandoraMetrics struct {
@@ -62,18 +71,28 @@ type PandoraMetrics struct {
 
 type GrouppedMetrics map[string][]SimpleMetrics
 type FilteredMetrics struct {
-	Tags   map[string]string
-	Fields map[string]interface{}
+	Measurement string
+	Tags        map[string]string
+	Fields      map[string]interface{}
+}
+
+func (fm FilteredMetrics) String() string {
+	tags := make([]string, len(fm.Tags))
+	i := 0
+	for k, v := range fm.Tags {
+		tags[i] = fmt.Sprintf("%s=%s", k, v)
+		i++
+	}
+
+	fields := make([]string, len(fm.Fields))
+	i = 0
+	for k, v := range fm.Fields {
+		fields[i] = fmt.Sprintf("%s=%s", k, v)
+		i++
+	}
+	return fmt.Sprintf("%s,%s %s", fm.Measurement, strings.Join(tags, ","), strings.Join(fields, ","))
 }
 
 func NewFilteredMetric() FilteredMetrics {
 	return FilteredMetrics{Tags: map[string]string{}, Fields: map[string]interface{}{}}
-}
-
-func (f FilteredMetrics) IsEmpty() bool {
-	if len(f.Fields) == 0 {
-		return true
-	}
-
-	return false
 }

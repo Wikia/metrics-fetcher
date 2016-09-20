@@ -21,11 +21,8 @@ func CombineMetrics(serviceMetrics models.GrouppedMetrics) ([]models.FilteredMet
 	for _, metrics := range serviceMetrics {
 		for _, filter := range filters {
 			for _, metric := range metrics {
-				filteredMetric := filter.Parse(metric.Metrics)
-
-				if !filteredMetric.IsEmpty() {
-					result = append(result, filteredMetric)
-				}
+				filteredMetrics := filter.Parse(metric)
+				result = append(result, filteredMetrics...)
 			}
 		}
 	}
