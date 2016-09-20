@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -62,16 +63,18 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" { // enable ability to specify config file via flag
-		viper.SetConfigFile(cfgFile)
-	}
-
 	viper.SetConfigName(".metrics-fetcher") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")            // adding home directory as first search path
 	viper.AutomaticEnv()                    // read in environment variables that match
 
+	if cfgFile != "" { // enable ability to specify config file via flag
+		viper.SetConfigFile(cfgFile)
+	}
+
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	if err := viper.ReadInConfig(); err != nil {
+		log.WithError(err).Error("Error loading config file")
+	} else {
+		log.Infof("Using config file:", viper.ConfigFileUsed())
 	}
 }
