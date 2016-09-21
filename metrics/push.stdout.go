@@ -16,41 +16,49 @@ func OutputMetrics(filteredMetrics []models.FilteredMetrics, writer io.Writer) e
 			return errors.Errorf("no fields in metric")
 		}
 
-		tagKeysAndValues := []string{}
+		tagKeysAndValues := make([]string, len(metric.Tags)/2)
 		for tagKey, tagValue := range metric.Tags {
-			tagKeysAndValues = append(tagKeysAndValues, fmt.Sprintf("%s=%s", escapeCommasEqualSignsAndSpaces(tagKey), escapeCommasEqualSignsAndSpaces(tagValue)))
+			tagKeysAndValues = append(tagKeysAndValues, fmt.Sprintf("%s=%s", escapeSpecialChars(tagKey), escapeSpecialChars(tagValue)))
 		}
 		tags := strings.Join(tagKeysAndValues, ",")
 
-		fieldKeysAndValues := []string{}
+		fieldKeysAndValues := make([]string, len(metric.Fields)/2)
 		for fieldKey, fieldValue := range metric.Fields {
-			valueFormat := "%s"
+			var valueFormat string
 			switch fieldValue.(type) {
 			case string:
-				valueFormat = "%q" //puts into quotes and escape quotes
+				valueFormat = "%q" //escapes quotes and puts into quotes
 			case uint, uint8, uint16, uint32, uint64, int, int8, int16, int32, int64:
 				valueFormat = "%d"
 			case float32, float64:
 				valueFormat = "%g"
 			case bool:
 				valueFormat = "%t"
+			default:
+				valueFormat = "%v"
 			}
 
-			fieldKeysAndValues = append(fieldKeysAndValues, fmt.Sprintf(fmt.Sprintf("%%s=%s", valueFormat), escapeCommasEqualSignsAndSpaces(fieldKey), fieldValue))
+			fieldKeysAndValues = append(fieldKeysAndValues, fmt.Sprintf(fmt.Sprintf("%%s=%s", valueFormat), escapeSpecialChars(fieldKey), fieldValue))
 		}
 		fields := strings.Join(fieldKeysAndValues, ",")
 		if len(tags) == 0 {
-			fmt.Fprint(writer, fmt.Sprintf("%s %s\n", "resources", fields))
+			fmt.Fprint(writer, fmt.Sprintf("%s %s\n", escapeMeasurementName(metric.Measurement), fields))
 		} else {
-			fmt.Fprint(writer, fmt.Sprintf("%s,%s %s\n", "resources", tags, fields))
+			fmt.Fprint(writer, fmt.Sprintf("%s,%s %s\n", escapeMeasurementName(metric.Measurement), tags, fields))
 		}
 	}
 	return nil
 }
 
-func escapeCommasEqualSignsAndSpaces(value string) string {
+func escapeSpecialChars(value string) string {
 	value = strings.Replace(value, " ", "\\ ", -1)
 	value = strings.Replace(value, ",", "\\,", -1)
 	value = strings.Replace(value, "=", "\\=", -1)
+	return value
+}
+
+func escapeMeasurementName(value string) string {
+	value = strings.Replace(value, " ", "\\ ", -1)
+	value = strings.Replace(value, ",", "\\,", -1)
 	return value
 }
