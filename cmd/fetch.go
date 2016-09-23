@@ -27,6 +27,7 @@ import (
 	"github.com/Wikia/metrics-fetcher/metrics"
 	"github.com/Wikia/metrics-fetcher/registry"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
@@ -70,7 +71,7 @@ For now it supports only Influx line protocol.`,
 		// 	return
 		// }
 		combinedMetrics, _ := metrics.CombineMetrics(grouppedMetrics)
-		log.Debug(combinedMetrics)
+		metrics.OutputMetrics(combinedMetrics, os.Stdout)
 	},
 }
 
