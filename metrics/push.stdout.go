@@ -16,13 +16,16 @@ func OutputMetrics(filteredMetrics []models.FilteredMetrics, writer io.Writer) e
 			return errors.Errorf("no fields in metric")
 		}
 
-		tagKeysAndValues := make([]string, len(metric.Tags)/2)
+		tagKeysAndValues := make([]string, len(metric.Tags))
+		i := 0
 		for tagKey, tagValue := range metric.Tags {
-			tagKeysAndValues = append(tagKeysAndValues, fmt.Sprintf("%s=%s", escapeSpecialChars(tagKey), escapeSpecialChars(tagValue)))
+			tagKeysAndValues[i] = fmt.Sprintf("%s=%s", escapeSpecialChars(tagKey), escapeSpecialChars(tagValue))
+			i++;
 		}
 		tags := strings.Join(tagKeysAndValues, ",")
 
-		fieldKeysAndValues := make([]string, len(metric.Fields)/2)
+		fieldKeysAndValues := make([]string, len(metric.Fields))
+		j := 0
 		for fieldKey, fieldValue := range metric.Fields {
 			var valueFormat string
 			switch fieldValue.(type) {
@@ -38,7 +41,8 @@ func OutputMetrics(filteredMetrics []models.FilteredMetrics, writer io.Writer) e
 				valueFormat = "%v"
 			}
 
-			fieldKeysAndValues = append(fieldKeysAndValues, fmt.Sprintf(fmt.Sprintf("%%s=%s", valueFormat), escapeSpecialChars(fieldKey), fieldValue))
+			fieldKeysAndValues[j] = fmt.Sprintf(fmt.Sprintf("%%s=%s", valueFormat), escapeSpecialChars(fieldKey), fieldValue)
+			j++
 		}
 		fields := strings.Join(fieldKeysAndValues, ",")
 		if len(tags) == 0 {
