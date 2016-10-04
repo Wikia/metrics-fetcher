@@ -9,7 +9,11 @@ import (
 	"github.com/influxdata/influxdb/client/v2"
 )
 
-func SendMetrics(address string, username string, password string, grouppedMetrics models.GrouppedMetrics) error {
+func SendMetrics(address string, username string, password string, filteredMetrics []models.FilteredMetrics, timestamp time.Time) error {
+	if len(filteredMetrics) == 0 {
+		return nil
+	}
+
 	log.WithField("db_host", address).Info("Connecting to InfluxDB")
 	c, err := client.NewHTTPClient(client.HTTPConfig{
 		Addr:      address,
@@ -24,43 +28,43 @@ func SendMetrics(address string, username string, password string, grouppedMetri
 		return err
 	}
 
-	for serviceName, metrics := range grouppedMetrics {
-		bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-			Database:        "services",
-			RetentionPolicy: "default",
-		})
+	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:        "services",
+		RetentionPolicy: "default",
+	})
 
-		if err != nil {
-			err = errors.Wrap(err, 0)
-			log.WithError(err).Error("Error creating batch")
+	if err != nil {
+		err = errors.Wrap(err, 0)
+		log.WithError(err).Error("Error creating batch")
+		return err
+	}
+
+	pointsAdded := 0
+	for _, metrics := range filteredMetrics {
+		if len(metrics.Fields) == 0 {
+			log.Warn("No fields in metric - skipping")
 			continue
 		}
+		log.WithField("measurement", metrics.Measurement).Info("Sending metrics")
 
-		log.WithField("service_name", serviceName).Info("Sending metrics")
-		tags := map[string]string{"service_name": serviceName}
-		pointsNum := 0
-		for _, metric := range metrics {
-			fields := map[string]interface{}{}
-			tags["hostname"] = metric.Service.Host
-			pt, err := client.NewPoint("service_stats", tags, fields, time.Now())
-			if err != nil {
-				log.WithError(err).Error("Error adding points to a batch")
-				continue
-			}
-			pointsNum++
-			bp.AddPoint(pt)
-		}
-
-		if pointsNum == 0 {
-			log.WithField("service_name", serviceName).Info("No points to send - skipping")
+		pt, err := client.NewPoint(metrics.Measurement, metrics.Tags, metrics.Fields, timestamp)
+		if err != nil {
+			log.WithError(err).Error("Error adding points to a batch")
 			continue
 		}
+		bp.AddPoint(pt)
+		pointsAdded++
+	}
 
-		err = c.Write(bp)
-		if err != nil {
-			err = errors.Wrap(err, 0)
-			log.WithError(err).Error("Error sending metrics to InfluxDB")
-		}
+	if pointsAdded == 0 {
+		log.Warn("No points added to a batch - not sending to Influx")
+		return nil
+	}
+
+	err = c.Write(bp)
+	if err != nil {
+		err = errors.Wrap(err, 0)
+		log.WithError(err).Error("Error sending metrics to InfluxDB")
 	}
 
 	return nil

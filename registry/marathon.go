@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"net/http"
 	"net/url"
 
 	log "github.com/Sirupsen/logrus"
@@ -15,9 +16,12 @@ type MarathonRegistry struct {
 	MaxWorker uint
 }
 
-func NewMarathonRegistry(host string, numWorkers uint) (*MarathonRegistry, error) {
+func NewMarathonRegistry(host string, numWorkers uint, client *http.Client) (*MarathonRegistry, error) {
 	config := marathon.NewDefaultConfig()
 	config.URL = host
+	if client != nil {
+		config.HTTPClient = client
+	}
 
 	log.Debug("Configuring Marathon Client with host: ", host)
 
@@ -60,7 +64,7 @@ func fetchServiceTasks(client marathon.Marathon, appID string) pool.WorkFunc {
 				Name: task.AppID,
 				ID:   task.ID,
 				Host: task.Host,
-				Port: task.Ports[len(task.Ports)-1],
+				Port: int64(task.Ports[len(task.Ports)-1]),
 			})
 		}
 		log.WithField("app_id", appID).Debug("Finished adding tasks")

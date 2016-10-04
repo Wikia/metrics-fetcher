@@ -1,12 +1,18 @@
 package metrics
 
 import (
+	"strings"
+	"testing"
+
+	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/metrics-fetcher/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"strings"
-	"testing"
 )
+
+func init() {
+	log.SetLevel(log.ErrorLevel)
+}
 
 func TestOutputMetricsWhenFiltersEmpty(t *testing.T) {
 	//given

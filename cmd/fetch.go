@@ -23,11 +23,15 @@ package cmd
 import (
 	"runtime"
 
+	"os"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/metrics-fetcher/metrics"
+	"github.com/Wikia/metrics-fetcher/models"
 	"github.com/Wikia/metrics-fetcher/registry"
+	"github.com/go-errors/errors"
 	"github.com/spf13/cobra"
-	"os"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -48,7 +52,7 @@ tag to process. Then it calls the very last port defined on the service (assumin
 to fetch metrics. Then it aggregates those metrics by a service id and sends them back to Influx
 For now it supports only Influx line protocol.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceRegistry, err := registry.NewMarathonRegistry(marathonHost, numWorkers)
+		serviceRegistry, err := registry.NewMarathonRegistry(marathonHost, numWorkers, nil)
 		if err != nil {
 			log.Error(err)
 			return
@@ -70,7 +74,15 @@ For now it supports only Influx line protocol.`,
 		// 	log.WithError(err).Error("Error sending metrics")
 		// 	return
 		// }
-		combinedMetrics, _ := metrics.CombineMetrics(grouppedMetrics)
+		filters := []models.Filter{}
+		err = viper.UnmarshalKey("filters", &filters)
+
+		if err != nil {
+			err = errors.Wrap(err, 0)
+			log.WithError(err).Error("Error loading filters from configuration")
+			return
+		}
+		combinedMetrics, _ := metrics.Combine(grouppedMetrics, filters)
 		metrics.OutputMetrics(combinedMetrics, os.Stdout)
 	},
 }

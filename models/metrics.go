@@ -3,6 +3,8 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -10,7 +12,7 @@ type ServiceInfo struct {
 	Name string
 	ID   string
 	Host string
-	Port int
+	Port int64
 }
 
 func (s ServiceInfo) GetAddress() string {
@@ -23,23 +25,18 @@ type SimpleMetrics struct {
 }
 
 type PandoraGauge struct {
-	Value     json.RawMessage
-	valueType string
+	Value json.RawMessage
 }
 
 func (pg PandoraGauge) String() string {
-	switch pg.valueType {
-	case "float64":
-		var val float64
-		json.Unmarshal(pg.Value, &val)
-		return fmt.Sprintf("%f", val)
-	case "int64":
-		var val int64
-		json.Unmarshal(pg.Value, &val)
-		return fmt.Sprintf("%d", val)
-	}
+	return fmt.Sprintf("%f", pg.Parse())
+}
 
-	return fmt.Sprintf("%v", pg.Value)
+func (pg PandoraGauge) Parse() float64 {
+	var val float64
+	json.Unmarshal(pg.Value, &val)
+
+	return val
 }
 
 type PandoraMeter struct {
@@ -54,11 +51,11 @@ type PandoraTimer struct {
 	Count  uint64
 	P50    float64
 	P99    float64
-	M1Rate float64
+	M1Rate float64 `json:"m1_rate"`
 }
 
 func (pt PandoraTimer) String() string {
-	return fmt.Sprintf("value: %v, P50: %v, P99: %v, M1_Rate: %v", pt.Count, pt.P50, pt.P99, pt.M1Rate)
+	return fmt.Sprintf("value: %v, P50: %f, P99: %f, M1_Rate: %f", pt.Count, pt.P50, pt.P99, pt.M1Rate)
 }
 
 type PandoraMetrics struct {
@@ -79,15 +76,34 @@ type FilteredMetrics struct {
 func (fm FilteredMetrics) String() string {
 	tags := make([]string, len(fm.Tags))
 	i := 0
-	for k, v := range fm.Tags {
-		tags[i] = fmt.Sprintf("%s=%s", k, v)
+	var keys []string
+	for k := range fm.Tags {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		tags[i] = fmt.Sprintf("%s=%v", k, fm.Tags[k])
 		i++
 	}
 
 	fields := make([]string, len(fm.Fields))
 	i = 0
-	for k, v := range fm.Fields {
-		fields[i] = fmt.Sprintf("%s=%s", k, v)
+	keys = []string{}
+	for k := range fm.Fields {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		v := fm.Fields[k]
+		switch v.(type) {
+		case string:
+			fields[i] = fmt.Sprintf("%s=%s", k, strconv.Quote(v.(string)))
+		default:
+			fields[i] = fmt.Sprintf("%s=%v", k, v)
+
+		}
 		i++
 	}
 	return fmt.Sprintf("%s,%s %s", fm.Measurement, strings.Join(tags, ","), strings.Join(fields, ","))

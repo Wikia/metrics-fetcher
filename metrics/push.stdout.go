@@ -20,7 +20,7 @@ func OutputMetrics(filteredMetrics []models.FilteredMetrics, writer io.Writer) e
 		i := 0
 		for tagKey, tagValue := range metric.Tags {
 			tagKeysAndValues[i] = fmt.Sprintf("%s=%s", escapeSpecialChars(tagKey), escapeSpecialChars(tagValue))
-			i++;
+			i++
 		}
 		tags := strings.Join(tagKeysAndValues, ",")
 

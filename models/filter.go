@@ -17,7 +17,6 @@ const (
 type Filter struct {
 	Group       string
 	Path        string
-	Type        string
 	Measurement string
 }
 
@@ -33,7 +32,6 @@ func (f Filter) match(key string) (bool, error) {
 }
 
 func (f Filter) parseGauge(key string, serviceInfo ServiceInfo, metric PandoraGauge) FilteredMetrics {
-	metric.valueType = f.Type
 	log.Debugf("Found gauge metric %s : %s", key, metric)
 	finalMetric := NewFilteredMetric()
 	finalMetric.Tags = map[string]string{
@@ -42,7 +40,7 @@ func (f Filter) parseGauge(key string, serviceInfo ServiceInfo, metric PandoraGa
 		"metric_name":  key,
 	}
 	finalMetric.Measurement = f.Measurement
-	finalMetric.Fields["value"] = metric
+	finalMetric.Fields["value"] = metric.Parse()
 	finalMetric.Fields["service_id"] = serviceInfo.ID
 
 	return finalMetric
@@ -81,7 +79,144 @@ func (f Filter) parseTimer(key string, serviceInfo ServiceInfo, metric PandoraTi
 	return finalMetric
 }
 
-func (f Filter) Parse(metrics SimpleMetrics) []FilteredMetrics {
+func (f Filter) averageGauges(key string, serviceName string, gauges []PandoraGauge) FilteredMetrics {
+	finalMetric := NewFilteredMetric()
+
+	if len(gauges) == 0 {
+		return finalMetric
+	}
+
+	finalMetric.Measurement = "metric_graphs"
+	finalMetric.Tags = map[string]string{
+		"service_name": serviceName,
+		"metric_name":  key,
+	}
+
+	var sum, min, max float64
+	for i, item := range gauges {
+		value := item.Parse()
+
+		if i == 0 {
+			max = value
+			min = value
+			sum = value
+			continue
+		}
+
+		if value > max {
+			max = value
+		}
+		if value < min {
+			min = value
+		}
+		sum = sum + value
+	}
+
+	finalMetric.Fields["min"] = min
+	finalMetric.Fields["max"] = max
+	finalMetric.Fields["med"] = sum / float64(len(gauges))
+
+	return finalMetric
+}
+
+func (f Filter) averageMeters(key string, serviceName string, meters []PandoraMeter) FilteredMetrics {
+	finalMetric := NewFilteredMetric()
+
+	if len(meters) == 0 {
+		return finalMetric
+	}
+
+	finalMetric.Measurement = "metric_graphs"
+	finalMetric.Tags = map[string]string{
+		"service_name": serviceName,
+		"metric_name":  key,
+	}
+
+	var sum uint64
+	for _, meter := range meters {
+		sum = sum + meter.Count
+	}
+
+	finalMetric.Fields["value"] = sum
+
+	return finalMetric
+}
+
+func (f Filter) averageTimers(key string, serviceName string, timers []PandoraTimer) FilteredMetrics {
+	finalMetric := NewFilteredMetric()
+
+	if len(timers) == 0 {
+		return finalMetric
+	}
+
+	finalMetric.Measurement = "metric_graphs"
+	finalMetric.Tags = map[string]string{
+		"service_name": serviceName,
+		"metric_name":  key,
+	}
+
+	var sum uint64
+	var m1Min, m1Max, m1Med, p50Min, p50Max, p50Med, p99Min, p99Max, p99Med float64
+	for i, timer := range timers {
+		sum = sum + timer.Count
+
+		if i == 0 {
+			m1Min = timer.M1Rate
+			m1Max = timer.M1Rate
+			m1Med = timer.M1Rate
+
+			p50Min = timer.P50
+			p50Max = timer.P50
+			p50Med = timer.P50
+
+			p99Min = timer.P99
+			p99Max = timer.P99
+			p99Med = timer.P99
+
+			continue
+		}
+
+		if timer.M1Rate < m1Min {
+			m1Min = timer.M1Rate
+		}
+		if timer.M1Rate > m1Max {
+			m1Max = timer.M1Rate
+		}
+
+		if timer.P50 < p50Min {
+			p50Min = timer.P50
+		}
+		if timer.P50 > p50Max {
+			p50Max = timer.P50
+		}
+
+		if timer.P99 < p99Min {
+			p99Min = timer.P99
+		}
+		if timer.P99 > p99Max {
+			p99Max = timer.P99
+		}
+
+		m1Med = m1Med + timer.M1Rate
+		p50Med = p50Med + timer.P50
+		p99Med = p99Med + timer.P99
+	}
+
+	finalMetric.Fields["value"] = sum
+	finalMetric.Fields["m1_min"] = m1Min
+	finalMetric.Fields["m1_max"] = m1Max
+	finalMetric.Fields["m1_med"] = m1Med / float64(len(timers))
+	finalMetric.Fields["p50_min"] = p50Min
+	finalMetric.Fields["p50_max"] = p50Max
+	finalMetric.Fields["p50_med"] = p50Med / float64(len(timers))
+	finalMetric.Fields["p99_min"] = p99Min
+	finalMetric.Fields["p99_max"] = p99Max
+	finalMetric.Fields["p99_med"] = p99Med / float64(len(timers))
+
+	return finalMetric
+}
+
+func (f Filter) ParseSingle(metrics SimpleMetrics) []FilteredMetrics {
 	results := []FilteredMetrics{}
 	log.Debugf("Filtering for %v", f)
 
@@ -109,6 +244,60 @@ func (f Filter) Parse(metrics SimpleMetrics) []FilteredMetrics {
 			}
 
 			results = append(results, f.parseTimer(k, metrics.Service, v))
+		}
+	default:
+		log.Errorf("Unknown filter group: %s", f.Group)
+	}
+
+	return results
+}
+
+func (f Filter) ParseMany(serviceName string, metrics []SimpleMetrics) []FilteredMetrics {
+	results := []FilteredMetrics{}
+	log.Debugf("Groupping for %v", f)
+
+	switch f.Group {
+	case filterGauge:
+		gauges := map[string][]PandoraGauge{}
+		for _, metric := range metrics {
+			for k, v := range metric.Metrics.Gauges {
+				if match, _ := f.match(k); !match {
+					continue
+				}
+
+				gauges[k] = append(gauges[k], v)
+			}
+		}
+		for k, v := range gauges {
+			results = append(results, f.averageGauges(k, serviceName, v))
+		}
+	case filterMeter:
+		meters := map[string][]PandoraMeter{}
+		for _, metric := range metrics {
+			for k, v := range metric.Metrics.Meters {
+				if match, _ := f.match(k); !match {
+					continue
+				}
+
+				meters[k] = append(meters[k], v)
+			}
+		}
+		for k, v := range meters {
+			results = append(results, f.averageMeters(k, serviceName, v))
+		}
+	case filterTimer:
+		timers := map[string][]PandoraTimer{}
+		for _, metric := range metrics {
+			for k, v := range metric.Metrics.Timers {
+				if match, _ := f.match(k); !match {
+					continue
+				}
+
+				timers[k] = append(timers[k], v)
+			}
+		}
+		for k, v := range timers {
+			results = append(results, f.averageTimers(k, serviceName, v))
 		}
 	default:
 		log.Errorf("Unknown filter group: %s", f.Group)
