@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"runtime"
+	"time"
 
 	"os"
 
@@ -68,12 +69,6 @@ For now it supports only Influx line protocol.`,
 		log.Infof("Fetching metrics from services: %d", len(services))
 		grouppedMetrics := metrics.GatherServiceMetrics(services, numWorkers)
 
-		// log.Info("Sending metrics to database")
-		// err = metrics.SendMetrics(influxAddress, "", "", grouppedMetrics)
-		// if err != nil {
-		// 	log.WithError(err).Error("Error sending metrics")
-		// 	return
-		// }
 		filters := []models.Filter{}
 		err = viper.UnmarshalKey("filters", &filters)
 
@@ -84,13 +79,22 @@ For now it supports only Influx line protocol.`,
 		}
 		combinedMetrics, _ := metrics.Combine(grouppedMetrics, filters)
 		metrics.OutputMetrics(combinedMetrics, os.Stdout)
+
+		if len(influxAddress) != 0 {
+			log.WithField("server", influxAddress).Info("Sending metrics to database")
+			err = metrics.SendMetrics(influxAddress, influxDB, influxRetention, "", "", combinedMetrics, time.Now())
+			if err != nil {
+				log.WithError(err).Error("Error sending metrics")
+				return
+			}
+		}
 	},
 }
 
 func init() {
 	fetchCmd.Flags().StringVar(&marathonHost, "marathon", "http://localhost:8080", "address of a marathon API to connect to")
 	fetchCmd.Flags().StringVar(&marathonLabel, "label", "gather-metrics", "label to search services in marathon with")
-	fetchCmd.Flags().StringVar(&influxAddress, "influx", "http://localhost:8086", "address of an InfluxDB server where metrics should be pushed")
+	fetchCmd.Flags().StringVar(&influxAddress, "influx", "", "address of an InfluxDB server where metrics should be pushed")
 	fetchCmd.Flags().StringVar(&influxDB, "database", "services", "name of the InfluxDB database")
 	fetchCmd.Flags().StringVar(&influxRetention, "retention", "default", "which retention policy should we use for pushing metrics")
 	fetchCmd.Flags().UintVar(&numWorkers, "workers", uint(runtime.NumCPU()*5), "how many fetcher workers to spawn")

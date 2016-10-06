@@ -9,7 +9,7 @@ import (
 	"github.com/influxdata/influxdb/client/v2"
 )
 
-func SendMetrics(address string, username string, password string, filteredMetrics []models.FilteredMetrics, timestamp time.Time) error {
+func SendMetrics(address string, database string, retention string, username string, password string, filteredMetrics []models.FilteredMetrics, timestamp time.Time) error {
 	if len(filteredMetrics) == 0 {
 		return nil
 	}
@@ -29,8 +29,8 @@ func SendMetrics(address string, username string, password string, filteredMetri
 	}
 
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:        "services",
-		RetentionPolicy: "default",
+		Database:        database,
+		RetentionPolicy: retention,
 	})
 
 	if err != nil {

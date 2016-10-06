@@ -17,3 +17,6 @@ filters:
       type: "float64"
       measurement: "jvm_memory"
 ```
+
+## Running
+`metrics-fetcher fetch --label metrics --marathon http://marathon.service.consul:8080 --influx http://influx.service.consul:8086 --database test`
