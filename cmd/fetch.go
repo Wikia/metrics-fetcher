@@ -98,5 +98,6 @@ func init() {
 	fetchCmd.Flags().StringVar(&influxDB, "database", "services", "name of the InfluxDB database")
 	fetchCmd.Flags().StringVar(&influxRetention, "retention", "default", "which retention policy should we use for pushing metrics")
 	fetchCmd.Flags().UintVar(&numWorkers, "workers", uint(runtime.NumCPU()*5), "how many fetcher workers to spawn")
+	fetchCmd.Flags().BoolVar(&silent, "silent", false, "suppress all logging")
 	RootCmd.AddCommand(fetchCmd)
 }

@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -29,7 +30,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	silent  bool
+)
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -59,10 +63,14 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.metrics-fetcher.yaml)")
+	RootCmd.PersistentFlags().BoolVar(&silent, "silent", false, "suppress all logging")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if silent {
+		log.SetOutput(ioutil.Discard)
+	}
 	viper.SetConfigName(".metrics-fetcher") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")            // adding home directory as first search path
 	viper.AutomaticEnv()                    // read in environment variables that match
@@ -75,6 +83,6 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.WithError(err).Error("Error loading config file")
 	} else {
-		log.Infof("Using config file:", viper.ConfigFileUsed())
+		log.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
 }
