@@ -69,7 +69,7 @@ var _ = Describe("Push", func() {
 		}
 
 		It("Should receive all metrics", func() {
-			err := SendMetrics(server.URL(), testUsername, testPassword, metrics, timestamp)
+			err := SendMetrics(server.URL(), "services", "default", testUsername, testPassword, metrics, timestamp)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
