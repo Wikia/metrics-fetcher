@@ -79,6 +79,9 @@ $(GO_BINDATA):
 gen-resources: $(GO_BINDATA)
 	$(GO_BINDATA) -o resources/resources.go -pkg resources -prefix resources -ignore resources.go resources/...
 
+bumpver-%:
+	GIT_VERSION=$(VERSION_GIT) bumpversion $*
+
 clean:
 	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
 
