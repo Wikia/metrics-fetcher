@@ -18,7 +18,7 @@ func TestOutputMetricsWhenFiltersEmpty(t *testing.T) {
 	//given
 	testObj := new(MockedWriter)
 	//when
-	OutputMetrics([]models.FilteredMetrics{}, testObj)
+	OutputMetrics([]models.FilteredMetrics{}, map[string]string{}, testObj)
 	//then
 	testObj.AssertNotCalled(t, "Write")
 }
@@ -30,7 +30,7 @@ func TestShouldWriteToOutputWhenNotEmptyFilters(t *testing.T) {
 	testObj.On("Write", expectedOutputLine).Return(len(expectedOutputLine), nil)
 	metric := metric(map[string]string{"exampleTag": "exampleTagValue"}, map[string]interface{}{"exampleField": "exampleFieldValue"})
 	//when
-	OutputMetrics([]models.FilteredMetrics{metric}, testObj)
+	OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{}, testObj)
 	//then
 	testObj.AssertExpectations(t)
 }
@@ -40,7 +40,7 @@ func TestShouldErrorWhenNoFields(t *testing.T) {
 	testObj := new(MockedWriter)
 	metric := metric(map[string]string{"exampleTag": "exampleTagValue"}, map[string]interface{}{})
 	//when
-	err := OutputMetrics([]models.FilteredMetrics{metric}, testObj)
+	err := OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{}, testObj)
 	//then
 	assert.NotNil(t, err)
 }
@@ -53,7 +53,21 @@ func TestShouldHandleNoTags(t *testing.T) {
 	metric := metric(map[string]string{}, map[string]interface{}{"exampleField": "exampleFieldValue"})
 
 	//when
-	OutputMetrics([]models.FilteredMetrics{metric}, testObj)
+	OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{}, testObj)
+
+	//then
+	testObj.AssertExpectations(t)
+}
+
+func TestShouldHandleExtraTags(t *testing.T) {
+	//given
+	testObj := new(MockedWriter)
+	expectedOutputLine := []byte("resources,foo=bar exampleField=\"exampleFieldValue\"\n")
+	testObj.On("Write", expectedOutputLine).Return(len(expectedOutputLine), nil)
+	metric := metric(map[string]string{}, map[string]interface{}{"exampleField": "exampleFieldValue"})
+
+	//when
+	OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{"foo": "bar"}, testObj)
 
 	//then
 	testObj.AssertExpectations(t)
@@ -75,7 +89,7 @@ func TestShouldHandleDifferentFieldTypes(t *testing.T) {
 	)
 
 	//when
-	OutputMetrics([]models.FilteredMetrics{metric}, testObj)
+	OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{}, testObj)
 
 	//then
 	testObj.AssertExpectations(t)
@@ -96,7 +110,7 @@ func TestShouldOutputMultipleMetrics(t *testing.T) {
 
 	testObj.On("Write", expectedOutputLine1).Return(len(expectedOutputLine1), nil).On("Write", expectedOutputLine2).Return(len(expectedOutputLine2), nil)
 	//when
-	OutputMetrics([]models.FilteredMetrics{metric1, metric2}, testObj)
+	OutputMetrics([]models.FilteredMetrics{metric1, metric2}, map[string]string{}, testObj)
 
 	//then
 	testObj.AssertExpectations(t)
@@ -114,7 +128,7 @@ func TestShouldEscapeTagKeys(t *testing.T) {
 		"exampleField": "exampleFieldValue",
 	})
 	//when
-	OutputMetrics([]models.FilteredMetrics{metric}, testObj)
+	OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{}, testObj)
 	//then
 	testObj.AssertExpectations(t)
 }
@@ -130,7 +144,7 @@ func TestShouldEscapeTagValues(t *testing.T) {
 		"exampleField": "exampleFieldValue",
 	})
 	//when
-	OutputMetrics([]models.FilteredMetrics{metric}, testObj)
+	OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{}, testObj)
 	//then
 	testObj.AssertExpectations(t)
 }
@@ -145,7 +159,7 @@ func TestShouldEscapeFieldKeys(t *testing.T) {
 	})
 
 	//when
-	OutputMetrics([]models.FilteredMetrics{metric}, testObj)
+	OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{}, testObj)
 	//then
 	testObj.AssertExpectations(t)
 }
@@ -157,7 +171,7 @@ func TestShouldOutputGivenMetricName(t *testing.T) {
 	metric := sampleMetricWithMeasurementName("measurementName")
 
 	//when
-	OutputMetrics([]models.FilteredMetrics{metric}, testObj)
+	OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{}, testObj)
 	//then
 	testObj.AssertExpectations(t)
 	calledWithMessage := string(testObj.Calls[0].Arguments.Get(0).([]byte))
@@ -172,7 +186,7 @@ func TestShouldEscapeMeasurementName(t *testing.T) {
 	metric := sampleMetricWithMeasurementName("measurem,en tName")
 
 	//when
-	OutputMetrics([]models.FilteredMetrics{metric}, testObj)
+	OutputMetrics([]models.FilteredMetrics{metric}, map[string]string{}, testObj)
 	//then
 	testObj.AssertExpectations(t)
 	calledWithMessage := string(testObj.Calls[0].Arguments.Get(0).([]byte))

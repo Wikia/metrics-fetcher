@@ -2,23 +2,29 @@ package metrics
 
 import (
 	"fmt"
+	"io"
+	"strings"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/metrics-fetcher/models"
 	"github.com/pkg/errors"
-	"io"
-	"strings"
 )
 
-func OutputMetrics(filteredMetrics []models.FilteredMetrics, writer io.Writer) error {
+func OutputMetrics(filteredMetrics []models.FilteredMetrics, extraTags map[string]string, writer io.Writer) error {
 	log.Info("outputting metrics")
 	for _, metric := range filteredMetrics {
 		if len(metric.Fields) == 0 {
 			return errors.Errorf("no fields in metric")
 		}
 
-		tagKeysAndValues := make([]string, len(metric.Tags))
+		tagKeysAndValues := make([]string, len(metric.Tags)+len(extraTags))
 		i := 0
 		for tagKey, tagValue := range metric.Tags {
+			tagKeysAndValues[i] = fmt.Sprintf("%s=%s", escapeSpecialChars(tagKey), escapeSpecialChars(tagValue))
+			i++
+		}
+
+		for tagKey, tagValue := range extraTags {
 			tagKeysAndValues[i] = fmt.Sprintf("%s=%s", escapeSpecialChars(tagKey), escapeSpecialChars(tagValue))
 			i++
 		}

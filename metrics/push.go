@@ -9,7 +9,7 @@ import (
 	"github.com/influxdata/influxdb/client/v2"
 )
 
-func SendMetrics(address string, database string, retention string, username string, password string, filteredMetrics []models.FilteredMetrics, timestamp time.Time) error {
+func SendMetrics(address string, database string, retention string, username string, password string, filteredMetrics []models.FilteredMetrics, extraTags map[string]string, timestamp time.Time) error {
 	if len(filteredMetrics) == 0 {
 		return nil
 	}
@@ -47,7 +47,12 @@ func SendMetrics(address string, database string, retention string, username str
 		}
 		log.WithField("measurement", metrics.Measurement).Info("Sending metrics")
 
-		pt, err := client.NewPoint(metrics.Measurement, metrics.Tags, metrics.Fields, timestamp)
+		tags := metrics.Tags
+		for k, v := range extraTags {
+			tags[k] = v
+		}
+
+		pt, err := client.NewPoint(metrics.Measurement, tags, metrics.Fields, timestamp)
 		if err != nil {
 			log.WithError(err).Error("Error adding points to a batch")
 			continue
