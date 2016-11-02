@@ -66,7 +66,7 @@ var _ = Describe("Process", func() {
 						Fields: map[string]interface{}{
 							"min": 112233.445566,
 							"max": 112233.445566,
-							"med": 112233.445566,
+							"avg": 112233.445566,
 						},
 					},
 				}
@@ -149,7 +149,7 @@ var _ = Describe("Process", func() {
 						Fields: map[string]interface{}{
 							"min": 20.00,
 							"max": 100.00,
-							"med": 60.00,
+							"avg": 60.00,
 						},
 					},
 				}
