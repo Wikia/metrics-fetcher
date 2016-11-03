@@ -142,7 +142,7 @@ func (f Filter) averageMeters(key string, serviceName string, meters []PandoraMe
 	}
 
 	finalMetric.Fields["count"] = len(meters)
-	finalMetric.Fields["m1_rate_sum"] = m1RateSum
+	finalMetric.Fields["m1_rate"] = m1RateSum
 	finalMetric.Fields["value"] = sum
 
 	return finalMetric

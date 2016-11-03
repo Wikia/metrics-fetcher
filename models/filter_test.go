@@ -333,9 +333,9 @@ var _ = Describe("Filter", func() {
 						"metric_name":  "some.very.custom_Path",
 					},
 					Fields: map[string]interface{}{
-						"value":       uint64(131),
-						"m1_rate_sum": float64(2.0),
-						"count":       2,
+						"value":   uint64(131),
+						"m1_rate": float64(2.0),
+						"count":   2,
 					},
 				},
 			}
