@@ -64,9 +64,10 @@ var _ = Describe("Process", func() {
 							"metric_name":  "test_metric",
 						},
 						Fields: map[string]interface{}{
-							"min": 112233.445566,
-							"max": 112233.445566,
-							"avg": 112233.445566,
+							"min":   112233.445566,
+							"max":   112233.445566,
+							"avg":   112233.445566,
+							"count": 1,
 						},
 					},
 				}
@@ -147,9 +148,10 @@ var _ = Describe("Process", func() {
 							"metric_name":  "test_metric",
 						},
 						Fields: map[string]interface{}{
-							"min": 20.00,
-							"max": 100.00,
-							"avg": 60.00,
+							"min":   20.00,
+							"max":   100.00,
+							"avg":   60.00,
+							"count": 2,
 						},
 					},
 				}

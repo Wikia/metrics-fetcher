@@ -112,6 +112,7 @@ func (f Filter) averageGauges(key string, serviceName string, gauges []PandoraGa
 		sum = sum + value
 	}
 
+	finalMetric.Fields["count"] = len(gauges)
 	finalMetric.Fields["min"] = min
 	finalMetric.Fields["max"] = max
 	finalMetric.Fields["avg"] = sum / float64(len(gauges))
@@ -137,6 +138,7 @@ func (f Filter) averageMeters(key string, serviceName string, meters []PandoraMe
 		sum = sum + meter.Count
 	}
 
+	finalMetric.Fields["count"] = len(meters)
 	finalMetric.Fields["value"] = sum
 
 	return finalMetric
@@ -202,7 +204,9 @@ func (f Filter) averageTimers(key string, serviceName string, timers []PandoraTi
 		p99Avg = p99Avg + timer.P99
 	}
 
-	finalMetric.Fields["value"] = sum
+	finalMetric.Fields["count"] = len(timers)
+	finalMetric.Fields["sum"] = sum
+	finalMetric.Fields["avg"] = float64(sum) / float64(len(timers))
 	finalMetric.Fields["m1_min"] = m1Min
 	finalMetric.Fields["m1_max"] = m1Max
 	finalMetric.Fields["m1_avg"] = m1Avg / float64(len(timers))
