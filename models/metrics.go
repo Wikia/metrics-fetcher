@@ -40,7 +40,8 @@ func (pg PandoraGauge) Parse() float64 {
 }
 
 type PandoraMeter struct {
-	Count uint64
+	Count  uint64
+	M1Rate float64 `json:"m1_rate"`
 }
 
 func (pm PandoraMeter) String() string {

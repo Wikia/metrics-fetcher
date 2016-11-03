@@ -51,6 +51,7 @@ func (f Filter) parseMeter(key string, serviceInfo ServiceInfo, metric PandoraMe
 	finalMetric := NewFilteredMetric()
 	finalMetric.Measurement = f.Measurement
 	finalMetric.Fields["value"] = metric.Count
+	finalMetric.Fields["m1_rate"] = metric.M1Rate
 	finalMetric.Fields["service_id"] = serviceInfo.ID
 	finalMetric.Tags = map[string]string{
 		"service_name": serviceInfo.Name,
@@ -134,11 +135,14 @@ func (f Filter) averageMeters(key string, serviceName string, meters []PandoraMe
 	}
 
 	var sum uint64
+	var m1RateSum float64
 	for _, meter := range meters {
 		sum = sum + meter.Count
+		m1RateSum = m1RateSum + meter.M1Rate
 	}
 
 	finalMetric.Fields["count"] = len(meters)
+	finalMetric.Fields["m1_rate_sum"] = m1RateSum
 	finalMetric.Fields["value"] = sum
 
 	return finalMetric

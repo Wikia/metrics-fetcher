@@ -33,16 +33,20 @@ var _ = Describe("Filter", func() {
 				},
 				Meters: map[string]PandoraMeter{
 					"some.very.custom_Path": {
-						Count: 123,
+						Count:  123,
+						M1Rate: 2.0,
 					},
 					"some.very.custom_Path2": {
-						Count: 73,
+						Count:  73,
+						M1Rate: 3.0,
 					},
 					"some_prefix_metric-sdf_34t_4hh2": {
-						Count: 87,
+						Count:  87,
+						M1Rate: 4.0,
 					},
 					"4some.very.custom_Path": {
-						Count: 1,
+						Count:  1,
+						M1Rate: 5.0,
 					},
 				},
 				Timers: map[string]PandoraTimer{
@@ -150,6 +154,7 @@ var _ = Describe("Filter", func() {
 					},
 					Fields: map[string]interface{}{
 						"value":      uint64(123),
+						"m1_rate":    float64(2.0),
 						"service_id": "123-45-67-89",
 					},
 				},
@@ -328,8 +333,9 @@ var _ = Describe("Filter", func() {
 						"metric_name":  "some.very.custom_Path",
 					},
 					Fields: map[string]interface{}{
-						"value": uint64(131),
-						"count": 2,
+						"value":       uint64(131),
+						"m1_rate_sum": float64(2.0),
+						"count":       2,
 					},
 				},
 			}
