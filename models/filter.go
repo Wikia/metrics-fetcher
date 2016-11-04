@@ -51,6 +51,7 @@ func (f Filter) parseMeter(key string, serviceInfo ServiceInfo, metric PandoraMe
 	finalMetric := NewFilteredMetric()
 	finalMetric.Measurement = f.Measurement
 	finalMetric.Fields["value"] = metric.Count
+	finalMetric.Fields["m1_rate"] = metric.M1Rate
 	finalMetric.Fields["service_id"] = serviceInfo.ID
 	finalMetric.Tags = map[string]string{
 		"service_name": serviceInfo.Name,
@@ -112,9 +113,11 @@ func (f Filter) averageGauges(key string, serviceName string, gauges []PandoraGa
 		sum = sum + value
 	}
 
+	finalMetric.Fields["count"] = len(gauges)
 	finalMetric.Fields["min"] = min
 	finalMetric.Fields["max"] = max
-	finalMetric.Fields["med"] = sum / float64(len(gauges))
+	finalMetric.Fields["sum"] = sum
+	finalMetric.Fields["avg"] = sum / float64(len(gauges))
 
 	return finalMetric
 }
@@ -133,10 +136,14 @@ func (f Filter) averageMeters(key string, serviceName string, meters []PandoraMe
 	}
 
 	var sum uint64
+	var m1RateSum float64
 	for _, meter := range meters {
 		sum = sum + meter.Count
+		m1RateSum = m1RateSum + meter.M1Rate
 	}
 
+	finalMetric.Fields["count"] = len(meters)
+	finalMetric.Fields["m1_rate"] = m1RateSum
 	finalMetric.Fields["value"] = sum
 
 	return finalMetric
@@ -156,22 +163,22 @@ func (f Filter) averageTimers(key string, serviceName string, timers []PandoraTi
 	}
 
 	var sum uint64
-	var m1Min, m1Max, m1Med, p50Min, p50Max, p50Med, p99Min, p99Max, p99Med float64
+	var m1Min, m1Max, m1Avg, p50Min, p50Max, p50Avg, p99Min, p99Max, p99Avg float64
 	for i, timer := range timers {
 		sum = sum + timer.Count
 
 		if i == 0 {
 			m1Min = timer.M1Rate
 			m1Max = timer.M1Rate
-			m1Med = timer.M1Rate
+			m1Avg = timer.M1Rate
 
 			p50Min = timer.P50
 			p50Max = timer.P50
-			p50Med = timer.P50
+			p50Avg = timer.P50
 
 			p99Min = timer.P99
 			p99Max = timer.P99
-			p99Med = timer.P99
+			p99Avg = timer.P99
 
 			continue
 		}
@@ -197,21 +204,23 @@ func (f Filter) averageTimers(key string, serviceName string, timers []PandoraTi
 			p99Max = timer.P99
 		}
 
-		m1Med = m1Med + timer.M1Rate
-		p50Med = p50Med + timer.P50
-		p99Med = p99Med + timer.P99
+		m1Avg = m1Avg + timer.M1Rate
+		p50Avg = p50Avg + timer.P50
+		p99Avg = p99Avg + timer.P99
 	}
 
-	finalMetric.Fields["value"] = sum
+	finalMetric.Fields["count"] = len(timers)
+	finalMetric.Fields["sum"] = sum
+	finalMetric.Fields["avg"] = float64(sum) / float64(len(timers))
 	finalMetric.Fields["m1_min"] = m1Min
 	finalMetric.Fields["m1_max"] = m1Max
-	finalMetric.Fields["m1_med"] = m1Med / float64(len(timers))
+	finalMetric.Fields["m1_avg"] = m1Avg / float64(len(timers))
 	finalMetric.Fields["p50_min"] = p50Min
 	finalMetric.Fields["p50_max"] = p50Max
-	finalMetric.Fields["p50_med"] = p50Med / float64(len(timers))
+	finalMetric.Fields["p50_avg"] = p50Avg / float64(len(timers))
 	finalMetric.Fields["p99_min"] = p99Min
 	finalMetric.Fields["p99_max"] = p99Max
-	finalMetric.Fields["p99_med"] = p99Med / float64(len(timers))
+	finalMetric.Fields["p99_avg"] = p99Avg / float64(len(timers))
 
 	return finalMetric
 }

@@ -6,15 +6,12 @@ Tool which pulls metrics from services registered in Consul and send them aggreg
 filters:
     - path: "io\\.dropwizard\\.db\\.ManagedPooledDataSource\\..*-master\\.idle"
       group: "gauges"
-      type: "int64"
       measurement: "http_server"
     - path: "org\\.eclipse\\.jetty\\.util\\.thread\\.QueuedThreadPool\\.dw\\.jobs"
       group: "gauges"
-      type: "int64"
       measurement: "http_server"
     - path: "jvm\\.memory\\.pools\\..*\\.usage"
       group: "gauges"
-      type: "float64"
       measurement: "jvm_memory"
 ```
 

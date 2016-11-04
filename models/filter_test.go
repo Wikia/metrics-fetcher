@@ -33,16 +33,20 @@ var _ = Describe("Filter", func() {
 				},
 				Meters: map[string]PandoraMeter{
 					"some.very.custom_Path": {
-						Count: 123,
+						Count:  123,
+						M1Rate: 2.0,
 					},
 					"some.very.custom_Path2": {
-						Count: 73,
+						Count:  73,
+						M1Rate: 3.0,
 					},
 					"some_prefix_metric-sdf_34t_4hh2": {
-						Count: 87,
+						Count:  87,
+						M1Rate: 4.0,
 					},
 					"4some.very.custom_Path": {
-						Count: 1,
+						Count:  1,
+						M1Rate: 5.0,
 					},
 				},
 				Timers: map[string]PandoraTimer{
@@ -150,6 +154,7 @@ var _ = Describe("Filter", func() {
 					},
 					Fields: map[string]interface{}{
 						"value":      uint64(123),
+						"m1_rate":    float64(2.0),
 						"service_id": "123-45-67-89",
 					},
 				},
@@ -297,9 +302,11 @@ var _ = Describe("Filter", func() {
 						"metric_name":  "some.very.custom_Path",
 					},
 					Fields: map[string]interface{}{
-						"med": float64(888),
-						"min": float64(542),
-						"max": float64(1234),
+						"avg":   float64(888),
+						"min":   float64(542),
+						"max":   float64(1234),
+						"sum":   float64(1776),
+						"count": 2,
 					},
 				},
 			}
@@ -327,7 +334,9 @@ var _ = Describe("Filter", func() {
 						"metric_name":  "some.very.custom_Path",
 					},
 					Fields: map[string]interface{}{
-						"value": uint64(131),
+						"value":   uint64(131),
+						"m1_rate": float64(2.0),
+						"count":   2,
 					},
 				},
 			}
@@ -357,14 +366,16 @@ var _ = Describe("Filter", func() {
 					Fields: map[string]interface{}{
 						"p99_min": float64(2.33),
 						"p99_max": float64(32.478),
-						"p99_med": float64(17.404),
-						"value":   uint64(20),
+						"p99_avg": float64(17.404),
+						"sum":     uint64(20),
+						"avg":     float64(10),
 						"p50_min": float64(1.12),
-						"m1_med":  float64(4.022),
+						"m1_avg":  float64(4.022),
 						"p50_max": float64(77.31),
-						"p50_med": float64(39.215),
+						"p50_avg": float64(39.215),
 						"m1_min":  float64(3.14),
 						"m1_max":  float64(4.904),
+						"count":   2,
 					},
 				},
 			}

@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"runtime"
+	"strings"
 	"time"
 
 	"os"
@@ -42,6 +43,7 @@ var (
 	influxDB        string
 	influxRetention string
 	numWorkers      uint
+	extraTags       string
 )
 
 // fetchCmd represents the fetch command
@@ -77,12 +79,23 @@ For now it supports only Influx line protocol.`,
 			log.WithError(err).Error("Error loading filters from configuration")
 			return
 		}
+
+		tags := map[string]string{}
+		for _, val := range strings.Split(extraTags, ",") {
+			elems := strings.Split(val, "=")
+			if len(elems) == 2 && len(elems[0]) > 0 && len(elems[1]) > 0 {
+				tags[elems[0]] = elems[1]
+			} else {
+				log.WithField("tag", elems).Warning("Cannot parse tags")
+			}
+		}
+
 		combinedMetrics, _ := metrics.Combine(grouppedMetrics, filters)
-		metrics.OutputMetrics(combinedMetrics, os.Stdout)
+		metrics.OutputMetrics(combinedMetrics, tags, os.Stdout)
 
 		if len(influxAddress) != 0 {
 			log.WithField("server", influxAddress).Info("Sending metrics to database")
-			err = metrics.SendMetrics(influxAddress, influxDB, influxRetention, "", "", combinedMetrics, time.Now())
+			err = metrics.SendMetrics(influxAddress, influxDB, influxRetention, "", "", combinedMetrics, tags, time.Now())
 			if err != nil {
 				log.WithError(err).Error("Error sending metrics")
 				return
@@ -98,5 +111,7 @@ func init() {
 	fetchCmd.Flags().StringVar(&influxDB, "database", "services", "name of the InfluxDB database")
 	fetchCmd.Flags().StringVar(&influxRetention, "retention", "default", "which retention policy should we use for pushing metrics")
 	fetchCmd.Flags().UintVar(&numWorkers, "workers", uint(runtime.NumCPU()*5), "how many fetcher workers to spawn")
+	fetchCmd.Flags().BoolVar(&silent, "silent", false, "suppress all logging")
+	fetchCmd.Flags().StringVar(&extraTags, "tags", "", "additional tags to add to all metrics (key=value,key2=value2)")
 	RootCmd.AddCommand(fetchCmd)
 }

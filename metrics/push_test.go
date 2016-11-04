@@ -36,11 +36,12 @@ var _ = Describe("Push", func() {
 				ghttp.CombineHandlers(
 					ghttp.VerifyBasicAuth(testUsername, testPassword),
 					ghttp.VerifyRequest("POST", "/write", "consistency=&db=services&precision=ns&rp=default"),
-					ghttp.VerifyBody([]byte(fmt.Sprintf("test-measurement,host=localhost,metric_name=test_metric,service_name=test-service service_id=\"1234-5678-90\",value=123.45566 %d\nmetric_graphs,metric_name=test_metric,service_name=test-service max=2568.4762,med=733.68,min=12.345 %d\n", timestamp.UnixNano(), timestamp.UnixNano()))),
+					ghttp.VerifyBody([]byte(fmt.Sprintf("test-measurement,foo=bar,host=localhost,metric_name=test_metric,service_name=test-service service_id=\"1234-5678-90\",value=123.45566 %d\nmetric_graphs,foo=bar,metric_name=test_metric,service_name=test-service max=2568.4762,med=733.68,min=12.345 %d\n", timestamp.UnixNano(), timestamp.UnixNano()))),
 					ghttp.RespondWith(http.StatusOK, "OK"),
 				),
 			)
 		})
+		extraTags := map[string]string{"foo": "bar"}
 		metrics := []models.FilteredMetrics{
 			{
 				Measurement: "test-measurement",
@@ -69,7 +70,7 @@ var _ = Describe("Push", func() {
 		}
 
 		It("Should receive all metrics", func() {
-			err := SendMetrics(server.URL(), testUsername, testPassword, metrics, timestamp)
+			err := SendMetrics(server.URL(), "services", "default", testUsername, testPassword, metrics, extraTags, timestamp)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
