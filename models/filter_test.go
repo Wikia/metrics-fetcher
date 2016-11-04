@@ -305,6 +305,7 @@ var _ = Describe("Filter", func() {
 						"avg":   float64(888),
 						"min":   float64(542),
 						"max":   float64(1234),
+						"sum":   float64(1776),
 						"count": 2,
 					},
 				},

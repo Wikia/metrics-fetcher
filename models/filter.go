@@ -116,6 +116,7 @@ func (f Filter) averageGauges(key string, serviceName string, gauges []PandoraGa
 	finalMetric.Fields["count"] = len(gauges)
 	finalMetric.Fields["min"] = min
 	finalMetric.Fields["max"] = max
+	finalMetric.Fields["sum"] = sum
 	finalMetric.Fields["avg"] = sum / float64(len(gauges))
 
 	return finalMetric
