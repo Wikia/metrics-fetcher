@@ -18,7 +18,7 @@ func (v VersionInfo) String() string {
 
 var (
 	// Version current version - semantic format
-	Version = "v0.3.4"
+	Version string
 	// BuildTime time of the build
 	BuildTime string
 )
