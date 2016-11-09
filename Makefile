@@ -22,7 +22,6 @@ TARGETS_FMT  := $(patsubst %,fmt-%, $(TARGETS))
 
 # Injecting project version and build time
 VERSION_GIT := $(shell sh -c 'git describe --always --tags')
-VERSION_GIT_REV := $(shell echo $(VERSION_GIT) | sed -E 's!^v[0-9]+\.[0-9]+\.[0-9]+!!')
 BUILD_TIME := `date +%FT%T%z`
 VERSION_PACKAGE := $(PROJECT_PATH)/common
 LDFLAGS := -ldflags "-X $(VERSION_PACKAGE).Version=${VERSION_GIT} -X $(VERSION_PACKAGE).BuildTime=${BUILD_TIME}"

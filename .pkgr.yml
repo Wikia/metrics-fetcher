@@ -1,4 +1,1 @@
 cli: metrics-fetcher
-env:
-    GO_LINKER_SYMBOL: github.com/Wikia/metrics-fetcher.common.Version
-    GO_LINKER_VALUE: v0.3.2
