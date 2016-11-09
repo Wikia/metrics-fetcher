@@ -22,6 +22,7 @@ TARGETS_FMT  := $(patsubst %,fmt-%, $(TARGETS))
 
 # Injecting project version and build time
 VERSION_GIT := $(shell sh -c 'git describe --always --tags')
+VERSION_GIT_REV := $(shell echo $(VERSION_GIT) | sed -E 's!^v[0-9]+\.[0-9]+\.[0-9]+!!')
 BUILD_TIME := `date +%FT%T%z`
 VERSION_PACKAGE := $(PROJECT_PATH)/common
 LDFLAGS := -ldflags "-X $(VERSION_PACKAGE).Version=${VERSION_GIT} -X $(VERSION_PACKAGE).BuildTime=${BUILD_TIME}"
@@ -80,7 +81,7 @@ gen-resources: $(GO_BINDATA)
 	$(GO_BINDATA) -o resources/resources.go -pkg resources -prefix resources -ignore resources.go resources/...
 
 bumpver-%:
-	GIT_VERSION=$(VERSION_GIT) bumpversion $*
+	GIT_VERSION=$(VERSION_GIT_REV) bumpversion $*
 
 clean:
 	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
