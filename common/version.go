@@ -9,7 +9,11 @@ type VersionInfo struct {
 }
 
 func (v VersionInfo) String() string {
-	return fmt.Sprintf("%s (time: %s)", v.Version, v.BuildTime)
+	if v.BuildTime != "" {
+		return fmt.Sprintf("%s (time: %s)", v.Version, v.BuildTime)
+	} else {
+		return fmt.Sprintf("%s", v.Version)
+	}
 }
 
 var (
