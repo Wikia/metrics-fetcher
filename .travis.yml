@@ -23,10 +23,17 @@ script:
 - make vet
 before_deploy:
 - goxc
+after_success:
+- if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci
+  -coverprofile=gover.coverprofile; fi
+os:
+- linux
+notifications:
+  email: false
 deploy:
   provider: releases
   api_key:
-    secure: CYzfOQ5pL7ZgXG6R+h1RryfJopLTKybk1B7vdj1LLMqCgpTrh4hlEMhJyiERYl+DvxdHk1GpMa9UFJT7Cu0XNattUmtaXrtPz2bMLcUd4z7nw0gU39apZ891JKy5MbB1TrchKh3BEZhNa5Cwh7A4MMugFXTcwEjdTPe4V9zGv9P/rltNZgc7Qg4KSvymzS5mxsGovEtZokfNNTVjv6OQa+Dd2j21VnMWUJV5mYCUkDMtGTiG7Zfns+slB8gDc3ciEqQqFrhfa6yB0fvZaw497H5sxRTdxF40+0BVgJ+zQJWKeNUHTVxDlp+ow/tMtBx2ofCPu49+i6iwQ8XEGYC4zRK0bWB15gdmIH6Ktnwb84V5JgM/UUooiWkqKLrnH35Yc9U9ki51BpPG8P7WoOHTSmIbRXLPlN8k44lxwBfBF6KRN+G3KW5unuvKlzuj51c/f+twFXWCZWdbv9c67tODtp3P0Gtf9ia013LmhDW0+yMhIDKOk38YfWtuk5dChsKoNPzPH2h+nZI3A4/OCckJzYfgWiqK74Y0R5YSHThl6mKnJNOWFyhEcoNQcIZlroQDCkx/HXicOw7kyhyMEJpV94P3TdUI+u/0eogIqx5afTq4SOZUCmB7lnMWapZLJbUz269YecJDtcy0mZknS98pK4VlI+1xCIOO8ZMIublMhio=
+    secure: dLZiCItgK0/OQGB/xolvDCWka3XraGP0m7J/3Dz9pC9Jx/i7Eu+O6s8KkNXMpDirVN++AkawQaTdOASRuFUjGFm4AqYVUOFMYmqyUkdFEsQubxVvk+WI8sy5Nev++mU8izJp2HpWMctVtSEUKdzcJWNDm2sT7XlL9XqEMieoqCEX6Mlkq41Uus3tmnE3XcHExUKZsaIsjtRb5nvtVda3zYXTXPM6A5+8Tz0DnCIj804wqWDIpxHShSEWUHl3KWtxsk9k9258ryeiH07MObJ89p6ccdNkqCnkE+JVgCOkoN0xsP929D8I33tdvv77WbRRR3Wfq9+NEioeyLuxou6y4iHs5UQ9gdj4NtOP0tE4+Ex7eYMbCqFdpQNjYsYB28Spiif3Gxepf2qVIKmI0K1TiscmINJfUuldJZPPJnCBIO0ZAnLN/O9U2jXUWUVbrbBe2vHRJ5DhOC0vUo7ne7WS9oOezNmZMl1TH4Vrd/xfW4K4iOL01kCx/5UhDaukDCGXmF1Cryex07WsIjYQhsJLD5fx7idH6PPs1VO1Mv+c93KDfWGr8Rq7X/bUZ9Al05sGfiV5iu6HFHHeGc9k6HSOCfdyHrZUOet6dBH5mlR6qBhE1haxaxcOUZr2JDob563ZhWGYKmJNTUz2o/7GJR6W/Z2pGQCmqA6qFbmBASr2YqI=
   file_glob: true
   file:
   - $HOME/gopath/bin/metrics-fetcher-xc/*/metrics-fetcher_*.tar.gz
@@ -35,10 +42,4 @@ deploy:
   on:
     tags: true
     go: 1.7.1
-after_success:
-- if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci
-  -coverprofile=gover.coverprofile; fi
-os:
-- linux
-notifications:
-  email: false
+    repo: Wikia/metrics-fetcher
