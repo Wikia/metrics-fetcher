@@ -26,14 +26,11 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: 3hvNnCyyEMbZDTUzDmkC/9wZqxzK3emMGUqzdiiDiTzZdnuQ9IDIt928/LCC5VMxATCfXhl/k2wJtY5uQufig/yv/lTUJZqjk53j5ME0CChsAs6H4YH0QUw7yOPLsUSksIMC9m+5Zjk8TCG0Iy+HfazsCzpH6Oi4gHJ0ZHtZGCRWKsgfh4EqU7th6TajwUvwg+yltD2c5+wPDmA92tVMKo1WdZzTEc7H643xm34z4pKzOcd+tbnkC5BmdcoCls7Hcg7Uen3nplqlf2TAhNGt5qVVFNyGyREv2rIRLbtB55XaGKxGkDu61sBno/ZbSYoNUyYyxqg9enpRJHNwulH1XjOHH2cmgSB+STceeIEUIXyF+JM1WS4zn/ssE7vplQb8q/b7AY+ueBSEX6IPm7MKuvol+Qp1uRMGa7mxt7Xs38Gdo792gbsXAhWOfWRz7j3vlr4MwOmA2RJ0Mp61Ht4AYR8Rp/NVYsB4wWRNGbnE0Pl+agOQ6nKGeTio+7163WD63RNIMfFOkNQXRl+kZPlmRV96nJ+nCdciInUHtX1F/MwBEk+3WkuwGTURWLPaeIWf05XHfHdDgA8vc9kT+eUwF9PFvuZR35YYgLvenF2uN6k2VlU7AOdys3X9JMv84QGAGqVvwomJiCcPDuYeVuYEg+eiEUDfsyUqODj3KGTwZaE=
+    secure: 0Vi3Qp+7qaTYCOgDMKgByCdDeu6sy5hPGKguGAqUwjfo2y0/doTThN42dO1PF65H/VIJKWVX5LV8l1ArQCYTOvSWSVXERtOxFLhaSkb3l547lDMDDRZcyayqreKpm9gxbgdnBTHonyhYtMpvhfgmtJjB/G1LN2qu7oaafShFfjmT4yLm1p6Jpp4et3Rl0mw2gFnDBEn3xDRfU4dmUxywSKIYL6wKeC2h7lvPWz38iuf6OtS5jVLPSknPQo50veOM6kx7gCvYFE0StQcqy36ob1tzlCyPp45PSE+RPItPMaCQmKTimdIdtv34gxqFXr8Xi236kk2llcJ1XV7aI+NjVUrZtL9tX32cuaw6LxHGLRD48ajQi70IqDuyI5NieCwPexdgxh3BldLEp2tYOHnXzXtjpw6taZTCoZIQkoEBKLmvL6mBWZfjWnb/WV3naN5UhldTyMrYxD1BQpLm10VV+CFiwO2/sqd3le7BeLG4ns2L9MkV5YndH+We/gUhbR5lCTcWyZDeOa33hq3N/+mvGp3VXseSaD87svPMF5pvsxxdwfnSWZmdTftlrUKT2gNUQmUsdGrfj6vU4u+N69IVsLpQ8YhGOjVFQXWTMtVN71ZTjL2zg5MIcmMe+aAAZAKKA7b8NnZEoN1UcXZfwthrf7LDyeu0Slsj+HQq8jRFHd4=
+  file_glob: true
   file:
-  - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_linux_arm.tar.gz
-  - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_linux_386.tar.gz
-  - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_linux_amd64.tar.gz
-  - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_i386.deb
-  - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_amd6.deb
-  - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_armhf.deb
+  - $HOME/gopath/bin/metrics-fetcher-xc/*/metrics-fetcher_*.tar.gz
+  - $HOME/gopath/bin/metrics-fetcher-xc/*/metrics-fetcher_*.deb
   skip_cleanup: true
   on:
     tags: true
