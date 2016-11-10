@@ -19,7 +19,13 @@ filters:
 `metrics-fetcher fetch --label metrics --marathon http://marathon.service.consul:8080 --influx http://influx.service.consul:8086 --database test`
 
 ## Releasing
+Do it only on **master** branch!
+
 * install [bumpversion](https://github.com/peritus/bumpversion)
+* install [github-changelog-generator](https://github.com/skywinder/github-changelog-generator)
+* run `github-changelog-generator -u Wikia -p metrics-fetcher`
+* `git add CHANGELOG.md`
+* commit changes
 * run `bumpversion patch` (or replace `patch` with either `minor` or `major`)
 * `git push --tags`
 * `git push`
