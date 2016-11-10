@@ -17,3 +17,9 @@ filters:
 
 ## Running
 `metrics-fetcher fetch --label metrics --marathon http://marathon.service.consul:8080 --influx http://influx.service.consul:8086 --database test`
+
+## Releasing
+* install [bumpversion](https://github.com/peritus/bumpversion)
+* run `bumpversion patch` (or replace `patch` with either `minor` or `major`)
+* `git push --tags`
+* `git push`
