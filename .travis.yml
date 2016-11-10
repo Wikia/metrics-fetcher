@@ -4,18 +4,19 @@ matrix:
   allow_failures:
   - go: tip
   include:
-    - go: 1.5.4
-      env: GO15VENDOREXPERIMENT=1
-    - go: 1.6.3
-    - go: 1.7.1
-      env: SEND_COVERAGE=1
-    - go: tip
+  - go: 1.5.4
+    env: GO15VENDOREXPERIMENT=1
+  - go: 1.6.3
+  - go: 1.7.1
+    env: SEND_COVERAGE=1
+  - go: tip
 env:
   global:
     secure: jyEoRXyOOxEoYvGO07yAfjAysNnzChAWbvMjbx3MXnMLIB3dyYz8+adZwFXqLBdxoLZyOZVwhol8X9i9Ql0zNaSLg41Oi4z+aSFFUp1rP0mt9vNqY5F5L04vGdXUTX/aUFxVlXfwDlc6BeP0qfDoFyEKBARimd94O7pw97zN/AxwsbW8Npp8tGJRUxgV5Mb//3+pPPvUP0hpt8h7WpOz38ALFOVU/K3SBkb1usBepHGmmnhXrP5TrwDtGUnDGhR/MVAgoW8DriQeOiEYfYROG98IZ8909sWkVUdgOMq/CfqHykZpoljvKYscrMMLfYLYKYTW87Cvq7kjfj1FYRHNr5fhDKqB3tyX12BaqyAsDL4NoH1nBDW5p+Oviq7g0I5V1ZomVpKp++KmPVGuhV7ecNYTQ93SKtpOdlkkSMh8T3F5ZB1BZz7vkbVHspn+iXl+KCPb2y4ySk+xBGrVcY7/Z21vA2/IzOkC+120rMwUB4rpujvR1nlVS824r1qTH4rxkreWpafYyreM3eUz6dCz9hcKlAwbdtSmOpyyH2E6EBHRrLwGygaLqd651ccZnlX/Cf9NzGrwghHqwoIewk0qBstiVadVsopgmL+wWP6xYjEtQ+ZSyz5xsJGDDZcnkJM0Ut6tYODuGe+JpqFzVpJGAHo1siZfaxA0fjy64E/cyL0=
 before_install:
 - go get github.com/mattn/goveralls
 - go get github.com/modocache/gover
+- go get github.com/laher/goxc
 install:
 - make prepare
 script:
@@ -23,8 +24,25 @@ script:
 - make fmt-check
 - if ([ "$TRAVIS_GO_VERSION" != "1.5.4" ]); then make lint; fi
 - make vet
+before_deploy:
+- goxc
+deploy:
+  provider: releases
+  api_key:
+    secure: CZ9nwU9d02vr/ioMPjHaIKSwUmu+zWqPcVNyebHQitwLruuBsAhYax28LSdtc830Zlm4TieWPePiSKrxKTRUzHp0CxLZFRAAddm+U3dkQsIT6OL+nwXxIZMf4pDcacDmN1QtcIOxAlahUxh+Fae4Jm1UtBPNxOFv+g4rUyM7V+eps/6v8svtwCPpkXnscBO8WqweTaxlb6UOLisj1o5m4e1IBTZdMsBm3tNeBQ5UPcixvP5YnYGx/W1AXD5JU4X587e8IEK0zXEDxRs2Sv4VLOsfYw2MKU4KyaHsieqPvqvzpI41UvHL1foO5oBrYNFTDoQ/XWk1PEqPC0vWTfty+kiVEPQGW9DSw7gkhgOkTjlLldu4w+yatljFfd06X44I+aUVa04mqfAWJRyPBZdtLn/9vRctz/1wskT5WwkXMtVrhAHY3sP84FXr0+NrFFJ+fvUxkDLFR/+REqloSaQKPQAwiYAJTPf4QUmtt67g2YghWIk/btEQMltTo7rPmObA+Z+ww7rhRiU1lumwp+gWYLSQzc99HJcJjPVpBpfLu/R6l7D0jwpzESdeaJm6BUWvlOvr3xhdrBks0CvszhAVyu4yHEFV0kYuf6djceiFKuD6IOtoAM12tQVmucB409E5eHnsc3HeUIHpWezB9/knmYv1ZWutBKYmexcb7cy7rbI=
+  file:
+    - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_linux_arm.tar.gz
+    - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_linux_386.tar.gz
+    - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_linux_amd64.tar.gz
+    - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_i386.deb
+    - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_amd6.deb
+    - $HOME/gopath/bin/metrics-fetcher-xc/$TRAVIS_TAG/metrics-fetcher_$TRAVIS_TAG_armhf.deb
+  skip_cleanup: true
+  on:
+    tags: true
 after_success:
-- if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=gover.coverprofile; fi
+- if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci
+  -coverprofile=gover.coverprofile; fi
 os:
 - linux
 notifications:

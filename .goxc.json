@@ -9,19 +9,19 @@
 			"repository": "metrics-fetcher"
 		},
 		"deb": {
-                "bin-dir": "/usr/bin",
-                "go-sources-dir": ".",
-                "metadata": {
-                        "maintainer": "Wikia Core Platform Team",
-                        "maintainerEmail": "platform-l@fandom.com"
-                },
-                "metadata-deb": {
-                        "Build-Depends": "debhelper (\u003e=4.0.0), golang-go, gcc",
-                        "Depends": ""
-                },
-                "other-mappped-files": {},
-                "rmtemp": true
-        }
+				"bin-dir": "/usr/bin",
+				"go-sources-dir": ".",
+				"metadata": {
+						"maintainer": "Wikia Core Platform Team",
+						"maintainerEmail": "platform-l@fandom.com"
+				},
+				"metadata-deb": {
+						"Build-Depends": "debhelper (\u003e=4.0.0), golang-go, gcc",
+						"Depends": ""
+				},
+				"other-mappped-files": {},
+				"rmtemp": true
+		}
 	},
 	"TasksExclude": [
 		"go-vet",
