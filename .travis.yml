@@ -40,6 +40,7 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
+    go: 1.7.1
 after_success:
 - if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci
   -coverprofile=gover.coverprofile; fi
