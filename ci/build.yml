@@ -15,4 +15,7 @@ run:
   path: sh
   args:
     - -exc
-    - export GOPATH=`pwd` && cd src/github.com/Wikia/metrics-fetcher && make
+    - |
+      export GOPATH=`pwd`
+      cd src/github.com/Wikia/metrics-fetcher
+
