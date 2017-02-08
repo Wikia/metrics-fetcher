@@ -29,4 +29,3 @@ Do it only on **master** branch!
 * run `bumpversion patch` (or replace `patch` with either `minor` or `major`)
 * `git push --tags`
 * `git push`
-
