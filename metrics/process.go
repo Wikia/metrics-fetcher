@@ -2,7 +2,8 @@ package metrics
 
 import "github.com/Wikia/metrics-fetcher/models"
 
-func Combine(serviceMetrics models.GrouppedMetrics, filters []models.Filter) ([]models.FilteredMetrics, error) {
+// Combine metrics and filter them according to current configuration
+func Combine(serviceMetrics models.GroupedMetrics, filters []models.Filter) ([]models.FilteredMetrics, error) {
 	result := []models.FilteredMetrics{}
 
 	for serviceName, metrics := range serviceMetrics {

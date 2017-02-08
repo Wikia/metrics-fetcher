@@ -9,6 +9,7 @@ import (
 	"github.com/influxdata/influxdb/client/v2"
 )
 
+// SendMetrics to Influx database
 func SendMetrics(address string, database string, retention string, username string, password string, filteredMetrics []models.FilteredMetrics, extraTags map[string]string, timestamp time.Time) error {
 	if len(filteredMetrics) == 0 {
 		return nil

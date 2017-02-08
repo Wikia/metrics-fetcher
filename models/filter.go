@@ -14,6 +14,7 @@ const (
 	filterTimer     = "timers"
 )
 
+// Filter defines metric filters to be applied
 type Filter struct {
 	Group       string
 	Path        string
@@ -225,6 +226,7 @@ func (f Filter) averageTimers(key string, serviceName string, timers []PandoraTi
 	return finalMetric
 }
 
+// ParseSingle will parse and filter single metric
 func (f Filter) ParseSingle(metrics SimpleMetrics) []FilteredMetrics {
 	results := []FilteredMetrics{}
 	log.Debugf("Filtering for %v", f)
@@ -261,6 +263,7 @@ func (f Filter) ParseSingle(metrics SimpleMetrics) []FilteredMetrics {
 	return results
 }
 
+// ParseMany will try to parse end group metrics
 func (f Filter) ParseMany(serviceName string, metrics []SimpleMetrics) []FilteredMetrics {
 	results := []FilteredMetrics{}
 	log.Debugf("Groupping for %v", f)

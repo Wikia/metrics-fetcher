@@ -19,7 +19,7 @@ var _ = Describe("Process", func() {
 		}
 
 		Context("With one metric", func() {
-			metrics := models.GrouppedMetrics{
+			metrics := models.GroupedMetrics{
 				"test-service": []models.SimpleMetrics{
 					{
 						Service: models.ServiceInfo{
@@ -77,7 +77,7 @@ var _ = Describe("Process", func() {
 		})
 
 		Context("With many metrics", func() {
-			metrics := models.GrouppedMetrics{
+			metrics := models.GroupedMetrics{
 				"test-service": []models.SimpleMetrics{
 					{
 						Service: models.ServiceInfo{

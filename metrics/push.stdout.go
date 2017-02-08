@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// OutputMetrics to STDOUT
 func OutputMetrics(filteredMetrics []models.FilteredMetrics, extraTags map[string]string, writer io.Writer) error {
 	log.Info("outputting metrics")
 	for _, metric := range filteredMetrics {

@@ -11,11 +11,13 @@ import (
 	"gopkg.in/go-playground/pool.v3"
 )
 
+// MarathonRegistry is the structure used to fetch services from Marathon
 type MarathonRegistry struct {
 	client    marathon.Marathon
 	MaxWorker uint
 }
 
+// NewMarathonRegistry creates new MarathonRegistry instance and instantiates API client
 func NewMarathonRegistry(host string, numWorkers uint, client *http.Client) (*MarathonRegistry, error) {
 	config := marathon.NewDefaultConfig()
 	config.URL = host
@@ -72,6 +74,7 @@ func fetchServiceTasks(client marathon.Marathon, appID string) pool.WorkFunc {
 	}
 }
 
+// GetServices returns list of services with a given label
 func (c MarathonRegistry) GetServices(label string) ([]models.ServiceInfo, error) {
 	v := url.Values{}
 	v.Set("label", label)

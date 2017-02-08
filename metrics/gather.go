@@ -8,7 +8,8 @@ import (
 	pool "gopkg.in/go-playground/pool.v3"
 )
 
-func GatherServiceMetrics(services []models.ServiceInfo, maxWorkers uint) models.GrouppedMetrics {
+// GatherServiceMetrics will fetch metrics for a given service
+func GatherServiceMetrics(services []models.ServiceInfo, maxWorkers uint) models.GroupedMetrics {
 	log.Infof("Starting metrics fetching: %d services", len(services))
 
 	log.Debugf("Starting workers for %d jobs", len(services))
@@ -26,7 +27,7 @@ func GatherServiceMetrics(services []models.ServiceInfo, maxWorkers uint) models
 	}()
 	log.Debug("All tasks scheduled!")
 
-	metrics := make(models.GrouppedMetrics)
+	metrics := make(models.GroupedMetrics)
 
 	for metric := range batch.Results() {
 		if err := metric.Error(); err != nil {
