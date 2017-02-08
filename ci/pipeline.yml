@@ -1,0 +1,24 @@
+resources:
+  - name: metrics-fetcher-github
+    type: git
+    source:
+      uri: https://github.com/Wikia/metrics-fetcher.git
+      branch: master
+
+jobs:
+  - name: metrics-fetcher-lint
+    plan:
+      - get: metrics-fetcher-github
+        trigger: true
+      - task: lint
+        file: metrics-fetcher-github/ci/lint.yml
+  - name: metrics-fetcher-test
+      - get: metrics-fetcher-github
+        trigger: true
+        file:
+  - name: metrics-fetcher-build
+    plan:
+      - get: metrics-fetcher-github
+        trigger: true
+      - task: build
+        file: metrics-fetcher-github/ci/build.yml
