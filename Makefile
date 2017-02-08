@@ -71,7 +71,7 @@ lint: $(GO_LINT) $(TARGETS_LINT)
 # @golint
 
 $(TARGETS_LINT): lint-%: %
-	@$(GO_LINT) $<
+	@$(GO_LINT) -set_exit_status $<
 
 $(GO_BINDATA):
 	go get -u github.com/jteeuwen/go-bindata/...
