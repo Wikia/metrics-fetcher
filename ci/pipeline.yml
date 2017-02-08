@@ -6,19 +6,28 @@ resources:
       branch: master
 
 jobs:
-  - name: tests
+  - name: test
+    plan:
+      - get: metrics-fetcher-github
+        trigger: true
+      - task: test
+        file: metrics-fetcher-github/ci/test.yml
+  - name: lint
     plan:
       - get: metrics-fetcher-github
         trigger: true
       - task: lint
         file: metrics-fetcher-github/ci/lint.yml
-      - task: test
-        file: metrics-fetcher-github/ci/test.yml
   - name: build
     plan:
       - aggregate:
         - get: metrics-fetcher-github
           trigger: true
-          passed: [tests]
+          passed: [test, lint]
       - task: build
         file: metrics-fetcher-github/ci/build.yml
+groups:
+- name: run tests
+  jobs:
+    - test
+    - lint
