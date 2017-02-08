@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -e -u -x
-
-export GOPATH=`pwd`
-
-make -C src/github.com/Wikia/metrics-fetcher

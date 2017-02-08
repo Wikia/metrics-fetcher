@@ -12,4 +12,7 @@ inputs:
     path: src/github.com/Wikia/metrics-fetcher
 
 run:
-  path: src/github.com/Wikia/metrics-fetcher/scripts/build
+  path: sh
+  args:
+    - -exc
+    - export GOPATH=`pwd` && cd src/github.com/Wikia/metrics-fetcher && make build
